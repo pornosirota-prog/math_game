@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:idlegame;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  flyway:
+    enabled: true
+
+app:
+  security:
+    jwt:
+      secret: "replace-with-long-secret-key-at-least-32-bytes-123456"
+      expiration-seconds: 86400
+  frontend:
+    base-url: http://localhost:5173
+
+server:
+  port: 8080
