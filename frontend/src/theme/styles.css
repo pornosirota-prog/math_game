@@ -1,0 +1,15 @@
+:root { font-family: Inter, system-ui, sans-serif; color: #eef4ff; background: #0b1320; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: #6bc5ff; }
+.layout { padding: 24px; max-width: 980px; margin: 0 auto; }
+.card { background: #141f33; border: 1px solid #2f466b; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+button { background: #3c74ff; color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+input { padding: 8px; border-radius: 8px; border: 1px solid #35517a; background: #0d1a2f; color: #e9f1ff; }
+.pulse { animation: pulse 0.5s ease; }
+.fade-up { animation: fadeUp 0.4s ease; }
+.glow { animation: glow 0.8s ease; }
+@keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.04)} 100%{transform:scale(1)} }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px)} to {opacity:1; transform:translateY(0)} }
+@keyframes glow { 0%{box-shadow:none} 50%{box-shadow:0 0 20px #51a2ff} 100%{box-shadow:none} }
