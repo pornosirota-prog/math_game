@@ -2,25 +2,28 @@ import { useEffect, useMemo, useState } from 'react';
 import type { FlowState, GameModeId, GeneratedTask, LeaderboardRecord, RunState, TaskAttempt } from '../domain/types';
 import { modeRegistry, defaultModeId } from '../systems/ModeRegistry';
 import { TaskFactory } from '../generators/TaskFactory';
-import { DifficultyAdapter } from '../systems/DifficultyAdapter';
+import { DifficultyEngine } from '../systems/DifficultyEngine';
 import { ScoreSystem } from '../systems/ScoreSystem';
 import { ProgressionSystem } from '../systems/ProgressionSystem';
 import { addLeaderboardRecord, loadLeaderboard, loadProgress, saveProgress } from '../storage/localStorageRepo';
 import { soundManager } from '../../sound/soundManager';
 
+import { createInitialMastery, tierByDifficultyScore } from '../config/adaptiveTemplates';
+
 const initialFlow: FlowState = {
-  skill: 1,
-  flow: 30,
-  avgAnswerMs: 4200,
-  accuracy: 0,
+  difficultyScore: 20,
+  currentTier: tierByDifficultyScore(20),
+  avgAnswerTimeMs: 4200,
+  accuracyRate: 0,
   correctStreak: 0,
-  errorStreak: 0
+  wrongStreak: 0,
+  templateMastery: createInitialMastery()
 };
 
 export interface AttemptSnapshot {
   isCorrect: boolean;
   answerMs: number;
-  skill: number;
+  difficultyScore: number;
   score: number;
 }
 
@@ -61,23 +64,29 @@ export const useMathTrainer = () => {
   const progressionSystem = useMemo(() => new ProgressionSystem(), []);
 
   const activeMode = modeRegistry.find((item) => item.id === modeId) ?? modeRegistry[0];
-  const difficultyAdapter = useMemo(() => new DifficultyAdapter(activeMode.adaptiveSmoothing), [activeMode.adaptiveSmoothing]);
+  const difficultyEngine = useMemo(() => new DifficultyEngine(activeMode.adaptiveSmoothing), [activeMode.adaptiveSmoothing]);
 
-  const spawnTask = () => {
-    const next = taskFactory.next(flow.skill, progress.unlockedTaskKinds);
+  const spawnTask = (state: FlowState = flow) => {
+    const next = taskFactory.next(state, progress.unlockedTaskKinds);
     setTask(next);
     setStartedAt(Date.now());
   };
 
-  const startRun = (nextModeId: GameModeId, manualSkill = initialFlow.skill) => {
-    const clampedSkill = Math.min(10, Math.max(1, manualSkill));
+  const startRun = (nextModeId: GameModeId, manualDifficultyScore = initialFlow.difficultyScore) => {
+    const clampedDifficultyScore = Math.min(100, Math.max(0, manualDifficultyScore));
     setModeId(nextModeId);
     setRun(buildRunState(nextModeId));
-    setFlow({ ...initialFlow, skill: clampedSkill });
+    const seededFlow: FlowState = {
+      ...initialFlow,
+      difficultyScore: clampedDifficultyScore,
+      currentTier: tierByDifficultyScore(clampedDifficultyScore),
+      templateMastery: createInitialMastery()
+    };
+    setFlow(seededFlow);
     setIsFinished(false);
     setAttemptHistory([]);
     setLastFeedback('Flow started');
-    const nextTask = taskFactory.next(clampedSkill, progress.unlockedTaskKinds);
+    const nextTask = taskFactory.next(seededFlow, progress.unlockedTaskKinds);
     setTask(nextTask);
     setStartedAt(Date.now());
     soundManager.play('click');
@@ -117,10 +126,13 @@ export const useMathTrainer = () => {
       answerMs: elapsed,
       inputValue: rawInput,
       expected: task.answer,
-      difficultyRating: task.difficultyRating
+      difficultyRating: task.difficultyRating,
+      templateId: task.templateId,
+      tier: task.tier,
+      expectedTimeMs: task.expectedTimeMs
     };
 
-    const nextFlow = difficultyAdapter.update(flow, attempt);
+    const nextFlow = difficultyEngine.update(flow, attempt);
     const scored = scoreSystem.scoreAttempt(nextFlow, attempt, run.combo);
 
     const nextRun: RunState = {
@@ -135,7 +147,7 @@ export const useMathTrainer = () => {
     };
     setAttemptHistory((prev) => [
       ...prev.slice(-(MAX_ATTEMPT_HISTORY - 1)),
-      { isCorrect, answerMs: elapsed, skill: nextFlow.skill, score: nextRun.score }
+      { isCorrect, answerMs: elapsed, difficultyScore: nextFlow.difficultyScore, score: nextRun.score }
     ]);
 
     const mode = modeRegistry.find((item) => item.id === run.modeId);
@@ -161,7 +173,7 @@ export const useMathTrainer = () => {
     setFlow(nextFlow);
     setLastFeedback(isCorrect ? `✅ +${scored.scoreDelta} combo x${nextRun.combo}` : `⚠️ ${task.answer}`);
     soundManager.play(isCorrect ? 'reward' : 'click');
-    spawnTask();
+    spawnTask(nextFlow);
   };
 
   useEffect(() => {

@@ -2,18 +2,34 @@ export type Operation = '+' | '-' | '*' | '/';
 
 export type TaskKind = 'arithmetic' | 'equation';
 
-export interface DifficultyBand {
-  minSkill: number;
-  maxSkill: number;
-  numberRange: [number, number];
-  termCount: [number, number];
+export type TemplateId =
+  | 'tier1_two_single_add'
+  | 'tier2_single_plus_double'
+  | 'tier3_two_double_no_carry'
+  | 'tier4_two_double_with_carry'
+  | 'tier5_two_triple_light'
+  | 'tier6_two_triple_carry'
+  | 'tier7_three_double_add'
+  | 'tier8_two_double_one_triple'
+  | 'tier9_three_triple_add'
+  | 'tier10_mixed_ops';
+
+export interface NumberSpec {
+  min: number;
+  max: number;
+}
+
+export interface DifficultyTemplate {
+  id: TemplateId;
+  tier: number;
+  label: string;
+  taskKind: TaskKind;
   operations: Operation[];
-  allowNegativeNumbers: boolean;
-  allowParentheses: boolean;
-  allowsUnknowns: boolean;
-  taskKinds: TaskKind[];
-  answerTimeLimitMs: number;
-  challengeChance: number;
+  numberSpecs: NumberSpec[];
+  expectedTimeMs: number;
+  allowNegativeResult: boolean;
+  requiresCarry?: boolean;
+  challengeWeight?: number;
 }
 
 export interface GeneratedTask {
@@ -23,6 +39,9 @@ export interface GeneratedTask {
   answer: number;
   difficultyRating: number;
   timeLimitMs: number;
+  templateId: TemplateId;
+  tier: number;
+  expectedTimeMs: number;
 }
 
 export interface TaskAttempt {
@@ -32,6 +51,9 @@ export interface TaskAttempt {
   inputValue: string;
   expected: number;
   difficultyRating: number;
+  templateId: TemplateId;
+  tier: number;
+  expectedTimeMs: number;
 }
 
 export type GameModeId = 'classic' | 'infinite' | 'streak' | 'sprint60' | 'twenty';
@@ -46,13 +68,16 @@ export interface GameMode {
   adaptiveSmoothing: number;
 }
 
+export type TemplateMasteryMap = Record<TemplateId, number>;
+
 export interface FlowState {
-  skill: number;
-  flow: number;
-  avgAnswerMs: number;
-  accuracy: number;
+  difficultyScore: number;
+  currentTier: number;
+  avgAnswerTimeMs: number;
+  accuracyRate: number;
   correctStreak: number;
-  errorStreak: number;
+  wrongStreak: number;
+  templateMastery: TemplateMasteryMap;
 }
 
 export interface RunState {

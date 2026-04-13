@@ -1,13 +1,7 @@
-import type { DifficultyBand, GeneratedTask, Operation } from '../domain/types';
+import type { DifficultyTemplate, GeneratedTask, Operation } from '../domain/types';
 
 const rndInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 const choose = <T,>(arr: T[]) => arr[rndInt(0, arr.length - 1)];
-
-const createDivisiblePair = (min: number, max: number) => {
-  const divisor = Math.max(2, Math.abs(rndInt(min, max)));
-  const result = rndInt(2, 12);
-  return { left: divisor * result, right: divisor };
-};
 
 const apply = (a: number, b: number, op: Operation): number => {
   if (op === '+') return a + b;
@@ -16,66 +10,68 @@ const apply = (a: number, b: number, op: Operation): number => {
   return a / b;
 };
 
-const opWeight = (op: Operation) => (op === '+' ? 0.6 : op === '-' ? 0.8 : op === '*' ? 1.2 : 1.5);
+const hasCarryInAddition = (a: number, b: number): boolean => {
+  let left = a;
+  let right = b;
+  while (left > 0 || right > 0) {
+    if ((left % 10) + (right % 10) >= 10) {
+      return true;
+    }
+    left = Math.floor(left / 10);
+    right = Math.floor(right / 10);
+  }
+  return false;
+};
+
+const generateAdditionPair = (template: DifficultyTemplate): [number, number] => {
+  const [firstSpec, secondSpec] = template.numberSpecs;
+
+  for (let i = 0; i < 250; i += 1) {
+    const a = rndInt(firstSpec.min, firstSpec.max);
+    const b = rndInt(secondSpec.min, secondSpec.max);
+    const hasCarry = hasCarryInAddition(a, b);
+    if (template.requiresCarry === undefined || template.requiresCarry === hasCarry) {
+      return [a, b];
+    }
+  }
+
+  return [rndInt(firstSpec.min, firstSpec.max), rndInt(secondSpec.min, secondSpec.max)];
+};
 
 export class ArithmeticTaskGenerator {
-  generate(band: DifficultyBand, skill: number): GeneratedTask {
-    const terms = rndInt(band.termCount[0], band.termCount[1]);
-    const numbers: number[] = [];
-    const operations: Operation[] = [];
+  generate(template: DifficultyTemplate, difficultyScore: number): GeneratedTask {
+    const numbers =
+      template.operations.length === 1 && template.operations[0] === '+' && template.numberSpecs.length === 2
+        ? generateAdditionPair(template)
+        : template.numberSpecs.map((spec) => rndInt(spec.min, spec.max));
 
-    for (let i = 0; i < terms; i += 1) {
-      numbers.push(rndInt(band.numberRange[0], band.numberRange[1]));
-      if (!band.allowNegativeNumbers) {
-        numbers[i] = Math.abs(numbers[i]);
-      }
-      if (i > 0) {
-        operations.push(choose(band.operations));
-      }
-    }
+    const operations = Array.from({ length: Math.max(0, numbers.length - 1) }, () => choose(template.operations));
 
-    for (let i = 0; i < operations.length; i += 1) {
-      if (operations[i] === '/') {
-        const pair = createDivisiblePair(Math.max(2, band.numberRange[0]), Math.max(3, band.numberRange[1]));
-        numbers[i] = pair.left;
-        numbers[i + 1] = pair.right;
-      }
-    }
-
-    let expression = `${numbers[0]}`;
     let value = numbers[0];
+    let expression = `${numbers[0]}`;
 
     for (let i = 0; i < operations.length; i += 1) {
       const op = operations[i];
-      const next = numbers[i + 1];
-      expression = `${expression} ${op} ${next}`;
-      value = apply(value, next, op);
-    }
-
-    if (band.allowParentheses && terms >= 3 && Math.random() > 0.55) {
-      const first = `${numbers[0]} ${operations[0]} ${numbers[1]}`;
-      const tailStart = 2;
-      const firstValue = apply(numbers[0], numbers[1], operations[0]);
-      expression = `(${first})`;
-      value = firstValue;
-      for (let i = tailStart - 1; i < operations.length; i += 1) {
-        const op = operations[i];
-        const next = numbers[i + 1];
-        expression = `${expression} ${op} ${next}`;
-        value = apply(value, next, op);
+      const right = numbers[i + 1];
+      if (op === '-' && !template.allowNegativeResult && value - right < 0) {
+        numbers[i + 1] = rndInt(1, Math.max(1, value));
       }
+      expression = `${expression} ${op} ${numbers[i + 1]}`;
+      value = apply(value, numbers[i + 1], op);
     }
 
-    const normalizedAnswer = Number(value.toFixed(2));
-    const rating = Number((skill + operations.reduce((sum, op) => sum + opWeight(op), 0)).toFixed(2));
+    const difficultyRating = Number((template.tier + difficultyScore / 25 + (template.challengeWeight ?? 1)).toFixed(2));
 
     return {
       id: crypto.randomUUID(),
-      kind: 'arithmetic',
+      kind: template.taskKind,
       prompt: expression,
-      answer: normalizedAnswer,
-      difficultyRating: rating,
-      timeLimitMs: band.answerTimeLimitMs
+      answer: Number(value.toFixed(2)),
+      difficultyRating,
+      timeLimitMs: Math.round(template.expectedTimeMs * 1.5),
+      templateId: template.id,
+      tier: template.tier,
+      expectedTimeMs: template.expectedTimeMs
     };
   }
 }
