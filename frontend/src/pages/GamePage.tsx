@@ -8,7 +8,7 @@ import { soundManager } from '../sound/soundManager';
 import { animationClasses } from '../animations/animationConfig';
 
 export const GamePage = () => {
-  const { progress, chests, boosts, lastReward, setLastReward, reload } = useGameData();
+  const { progress, chests, boosts, lastReward, setLastReward, reload, error } = useGameData();
 
   const openChest = async (chestType: string) => {
     soundManager.play('click');
@@ -25,6 +25,8 @@ export const GamePage = () => {
     soundManager.play('reward');
     await reload();
   };
+
+  if (error) return <div className="layout">{error}</div>;
 
   if (!progress) return <div className="layout">Loading...</div>;
 
