@@ -34,7 +34,7 @@ const PublicHeader = () => {
   return (
     <header className="layout app-topbar">
       <NavLink className="brand-link" to={token ? '/dashboard' : '/'}>
-        <span className="brand-title">Math Neon Arena</span>
+        <span className="brand-title">MATH TRAINER</span>
       </NavLink>
       <div className="nav-links">
         {!token && <NavLink to="/login">Войти</NavLink>}
@@ -49,32 +49,25 @@ const AppShell = () => {
   const setToken = useAuthStore((s) => s.setToken);
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar card">
-        <h2>Игровой центр</h2>
-        <NavLink to="/dashboard">Главная</NavLink>
-        <NavLink to="/modes">Режимы</NavLink>
-        <NavLink to="/game?mode=classic">Играть</NavLink>
-        <NavLink to="/results">Результаты</NavLink>
-        <NavLink to="/profile">Профиль</NavLink>
-        <NavLink to="/settings">Настройки</NavLink>
-      </aside>
-      <main className="shell-content">
-        <header className="card shell-header">
-          <div>
-            <strong>Math Neon Arena</strong>
-            <p>Прокачивай скорость, точность и рейтинг каждый день.</p>
+    <div className="trainer-shell">
+      <header className="trainer-toolbar">
+        <nav className="trainer-nav-left">
+          <NavLink to="/dashboard">☰</NavLink>
+          <NavLink to="/modes">Режимы</NavLink>
+        </nav>
+        <strong className="trainer-toolbar-title">MATH TRAINER</strong>
+        <details className="profile-dropdown">
+          <summary>☰</summary>
+          <div className="dropdown-menu">
+            <NavLink to="/game?mode=classic">Играть</NavLink>
+            <NavLink to="/results">Результаты</NavLink>
+            <NavLink to="/profile">Профиль</NavLink>
+            <NavLink to="/settings">Настройки</NavLink>
+            <button type="button" onClick={() => setToken(null)}>Выйти</button>
           </div>
-          <details className="profile-dropdown">
-            <summary>Профиль ▾</summary>
-            <div className="dropdown-menu">
-              <NavLink to="/profile">Профиль</NavLink>
-              <NavLink to="/dashboard">Моя статистика</NavLink>
-              <NavLink to="/settings">Настройки</NavLink>
-              <button type="button" onClick={() => setToken(null)}>Выйти</button>
-            </div>
-          </details>
-        </header>
+        </details>
+      </header>
+      <main className="trainer-main">
         <Outlet />
       </main>
     </div>

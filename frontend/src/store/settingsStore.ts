@@ -17,7 +17,7 @@ const defaultSettings = {
   soundEnabled: true,
   musicEnabled: true,
   notificationsEnabled: true,
-  darkThemeEnabled: true
+  darkThemeEnabled: false
 };
 
 const readSettings = () => {
