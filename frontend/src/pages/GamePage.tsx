@@ -46,6 +46,16 @@ export const GamePage = () => {
     setInput('');
   };
 
+  const onInputChange = (value: string) => {
+    setInput(value);
+    if (isPaused || !task) return;
+    const numeric = Number(value.replace(',', '.'));
+    const isCorrect = Number.isFinite(numeric) && Math.abs(numeric - task.answer) < 0.01;
+    if (!isCorrect) return;
+    submitAnswer(value);
+    setInput('');
+  };
+
   const goToResults = () => navigate('/results', {
     state: {
       score: run.score,
@@ -70,7 +80,7 @@ export const GamePage = () => {
             <input
               autoFocus
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => onInputChange(e.target.value)}
               placeholder={isPaused ? 'Игра на паузе' : 'Введите ответ и нажмите Enter'}
               disabled={isPaused}
             />
