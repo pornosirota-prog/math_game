@@ -1,13 +1,14 @@
 package com.example.idlegame.config;
 
 import com.example.idlegame.security.JwtAuthenticationFilter;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.example.idlegame.security.OAuth2LoginSuccessHandler;
@@ -31,17 +32,23 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter,
-                                                   OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) throws Exception {
-        return http
+                                                   OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+                                                   ObjectProvider<ClientRegistrationRepository> clientRegistrationRepositoryProvider)
+            throws Exception {
+        HttpSecurity configuredHttp = http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/h2-console/**", "/error").permitAll()
                         .requestMatchers("/oauth2/**", "/login/**").permitAll()
                         .anyRequest().authenticated())
-                .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2LoginSuccessHandler))
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        if (clientRegistrationRepositoryProvider.getIfAvailable() != null) {
+            configuredHttp.oauth2Login(oauth2 -> oauth2.successHandler(oAuth2LoginSuccessHandler));
+        }
+
+        return configuredHttp.build();
     }
 }
