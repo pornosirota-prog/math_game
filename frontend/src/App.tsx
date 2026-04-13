@@ -25,9 +25,9 @@ export default function App() {
   const token = useAuthStore((s) => s.token);
   return (
     <>
-      <div className="layout row" style={{ justifyContent: 'space-between' }}>
-        <h1>Idle Incremental</h1>
-        <div className="row">
+      <div className="layout app-topbar">
+        <h1 className="brand-title">Math Neon Arena</h1>
+        <div className="nav-links">
           {token && <Link to="/game">Game</Link>}
           {token && <Link to="/profile">Profile</Link>}
         </div>
