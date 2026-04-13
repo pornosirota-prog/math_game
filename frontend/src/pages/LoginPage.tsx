@@ -13,19 +13,20 @@ export const LoginPage = () => {
     e.preventDefault();
     const response = await gameApi.login(email, password);
     setToken(response.data.token);
-    navigate('/game');
+    navigate('/dashboard');
   };
 
   return (
-    <div className="layout card">
-      <h2>Login</h2>
+    <div className="layout card auth-card">
+      <h2>Вход</h2>
       <form onSubmit={submit} className="row">
         <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
         <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
-        <button type="submit">Login</button>
+        <button type="submit">Войти</button>
       </form>
-      <p><Link to="/register">Need an account? Register</Link></p>
-      <a href="http://localhost:8080/oauth2/authorization/google">Login with Google</a>
+      <p><Link to="/register">Нет аккаунта? Регистрация</Link></p>
+      <p><Link to="/">← На главную</Link></p>
+      <a href="http://localhost:8080/oauth2/authorization/google">Войти через Google</a>
     </div>
   );
 };
