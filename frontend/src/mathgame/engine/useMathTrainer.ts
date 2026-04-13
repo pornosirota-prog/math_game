@@ -6,6 +6,7 @@ import { DifficultyAdapter } from '../systems/DifficultyAdapter';
 import { ScoreSystem } from '../systems/ScoreSystem';
 import { ProgressionSystem } from '../systems/ProgressionSystem';
 import { addLeaderboardRecord, loadLeaderboard, loadProgress, saveProgress } from '../storage/localStorageRepo';
+import { soundManager } from '../../sound/soundManager';
 
 const initialFlow: FlowState = {
   skill: 1,
@@ -15,6 +16,15 @@ const initialFlow: FlowState = {
   correctStreak: 0,
   errorStreak: 0
 };
+
+export interface AttemptSnapshot {
+  isCorrect: boolean;
+  answerMs: number;
+  skill: number;
+  score: number;
+}
+
+const MAX_ATTEMPT_HISTORY = 24;
 
 const buildRunState = (modeId: GameModeId): RunState => {
   const mode = modeRegistry.find((item) => item.id === modeId);
@@ -44,6 +54,7 @@ export const useMathTrainer = () => {
   const [startedAt, setStartedAt] = useState(Date.now());
   const [lastFeedback, setLastFeedback] = useState<string>('Ready');
   const [isFinished, setIsFinished] = useState(false);
+  const [attemptHistory, setAttemptHistory] = useState<AttemptSnapshot[]>([]);
 
   const taskFactory = useMemo(() => new TaskFactory(), []);
   const scoreSystem = useMemo(() => new ScoreSystem(), []);
@@ -58,20 +69,26 @@ export const useMathTrainer = () => {
     setStartedAt(Date.now());
   };
 
-  const startRun = (nextModeId: GameModeId) => {
+  const startRun = (nextModeId: GameModeId, manualSkill = initialFlow.skill) => {
+    const clampedSkill = Math.min(10, Math.max(1, manualSkill));
     setModeId(nextModeId);
     setRun(buildRunState(nextModeId));
-    setFlow(initialFlow);
+    setFlow({ ...initialFlow, skill: clampedSkill });
     setIsFinished(false);
+    setAttemptHistory([]);
     setLastFeedback('Flow started');
-    const nextTask = taskFactory.next(initialFlow.skill, progress.unlockedTaskKinds);
+    const nextTask = taskFactory.next(clampedSkill, progress.unlockedTaskKinds);
     setTask(nextTask);
     setStartedAt(Date.now());
+    soundManager.play('click');
   };
 
   const finishRun = (finalRun: RunState) => {
     const accuracy = finalRun.answered === 0 ? 0 : finalRun.correct / finalRun.answered;
     const updatedProgress = progressionSystem.applyRun(progress, finalRun.score, accuracy);
+    if (updatedProgress.level > progress.level) {
+      soundManager.play('levelUp');
+    }
     setProgress(updatedProgress);
     saveProgress(updatedProgress);
 
@@ -116,12 +133,17 @@ export const useMathTrainer = () => {
       incorrect: run.incorrect + (isCorrect ? 0 : 1),
       bestCombo: Math.max(run.bestCombo, scored.nextCombo)
     };
+    setAttemptHistory((prev) => [
+      ...prev.slice(-(MAX_ATTEMPT_HISTORY - 1)),
+      { isCorrect, answerMs: elapsed, skill: nextFlow.skill, score: nextRun.score }
+    ]);
 
     const mode = modeRegistry.find((item) => item.id === run.modeId);
     if (mode?.failEndsRun && !isCorrect) {
       setRun(nextRun);
       setFlow(nextFlow);
       setLastFeedback(`❌ Mistake. Correct answer: ${task.answer}`);
+      soundManager.play('chestOpen');
       finishRun(nextRun);
       return;
     }
@@ -130,6 +152,7 @@ export const useMathTrainer = () => {
       setRun(nextRun);
       setFlow(nextFlow);
       setLastFeedback(isCorrect ? '✅ Finished target tasks!' : `⚠️ Correct answer: ${task.answer}`);
+      soundManager.play(isCorrect ? 'reward' : 'click');
       finishRun(nextRun);
       return;
     }
@@ -137,6 +160,7 @@ export const useMathTrainer = () => {
     setRun(nextRun);
     setFlow(nextFlow);
     setLastFeedback(isCorrect ? `✅ +${scored.scoreDelta} combo x${nextRun.combo}` : `⚠️ ${task.answer}`);
+    soundManager.play(isCorrect ? 'reward' : 'click');
     spawnTask();
   };
 
@@ -168,6 +192,7 @@ export const useMathTrainer = () => {
     task,
     progress,
     leaderboard,
+    attemptHistory,
     isFinished,
     lastFeedback,
     availableModes: modeRegistry.filter((mode) => progress.unlockedModes.includes(mode.id)),
