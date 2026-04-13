@@ -64,9 +64,23 @@ export const GamePage = () => {
 
   return (
     <div className="layout math-layout">
-      <div className="card">
-        <h2>Math Flow Arena</h2>
-        <p>Adaptive speed math trainer with progression and combo meta.</p>
+      <section className="hero-panel card">
+        <div>
+          <p className="hero-kicker">Modern Arcade Math</p>
+          <h2>Math Flow Arena</h2>
+          <p className="hero-subtitle">Премиальный speed-trainer с комбо, прогрессом и живой визуальной динамикой.</p>
+        </div>
+        <div className="hero-glass-preview">
+          <div className="preview-label">Live HUD</div>
+          <div className="preview-main">{task?.prompt ?? '128 + 47 = ?'}</div>
+          <div className="preview-meta">
+            <span>Combo x{run.combo}</span>
+            <span>{typeof run.remainingMs === 'number' ? `${(run.remainingMs / 1000).toFixed(1)}s` : '∞ time'}</span>
+          </div>
+        </div>
+      </section>
+
+      <div className="card mode-card">
         <div className="row mode-row">
           {availableModes.map((mode) => (
             <button
@@ -100,7 +114,7 @@ export const GamePage = () => {
         </div>
       </div>
 
-      <div className="card hud-grid">
+      <div className="card hud-grid neon-grid">
         <div><strong>Score:</strong> {run.score}</div>
         <div><strong>Combo:</strong> x{run.combo}</div>
         <div><strong>Speed:</strong> x{run.speedMultiplier.toFixed(2)}</div>
@@ -118,16 +132,16 @@ export const GamePage = () => {
               autoFocus
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type answer and hit Enter"
+              placeholder="Введите ответ и нажмите Enter"
             />
-            <button type="submit">Answer</button>
+            <button type="submit">Ответить</button>
           </form>
           <div className="feedback">{lastFeedback}</div>
         </div>
       )}
 
       {isFinished && (
-        <div className="card">
+        <div className="card result-card">
           <h3>Run Complete</h3>
           <p>Score: {run.score}</p>
           <p>Correct: {run.correct} / {run.answered}</p>
