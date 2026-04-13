@@ -16,7 +16,8 @@ export class EquationTaskGenerator {
       timeLimitMs: Math.max(3000, Math.round(template.expectedTimeMs * 1.3)),
       templateId: template.id,
       tier: template.tier,
-      expectedTimeMs: template.expectedTimeMs
+      expectedTimeMs: template.expectedTimeMs,
+      modifier: 'normal'
     };
   }
 }

@@ -43,7 +43,9 @@ const buildRunState = (modeId: GameModeId): RunState => {
     bestCombo: 0,
     startedAt: now,
     endsAt: mode?.initialDurationMs ? now + mode.initialDurationMs : undefined,
-    remainingMs: mode?.initialDurationMs
+    remainingMs: mode?.initialDurationMs,
+    shieldCharges: 0,
+    doublePointsLeft: 0
   };
 };
 
@@ -134,16 +136,33 @@ export const useMathTrainer = () => {
 
     const nextFlow = difficultyEngine.update(flow, attempt);
     const scored = scoreSystem.scoreAttempt(nextFlow, attempt, run.combo);
+    const hasDoublePoints = isCorrect && run.doublePointsLeft > 0;
+    const taskBonusMultiplier = isCorrect && task.modifier === 'golden' ? 2.5 : 1;
+    const blitzBonusMultiplier = isCorrect && task.modifier === 'blitz' && elapsed <= task.timeLimitMs ? 2 : 1;
+    const activeMultiplier = hasDoublePoints ? 2 : 1;
+    const effectiveScoreDelta = isCorrect
+      ? Math.round(scored.scoreDelta * taskBonusMultiplier * blitzBonusMultiplier * activeMultiplier)
+      : scored.scoreDelta;
+    const shieldProtectedMiss = !isCorrect && run.shieldCharges > 0;
+    const nextCombo = shieldProtectedMiss ? run.combo : scored.nextCombo;
 
     const nextRun: RunState = {
       ...run,
-      score: Math.max(0, run.score + scored.scoreDelta),
-      combo: scored.nextCombo,
+      score: Math.max(0, run.score + effectiveScoreDelta),
+      combo: nextCombo,
       speedMultiplier: scored.speedMultiplier,
       answered: run.answered + 1,
       correct: run.correct + (isCorrect ? 1 : 0),
       incorrect: run.incorrect + (isCorrect ? 0 : 1),
-      bestCombo: Math.max(run.bestCombo, scored.nextCombo)
+      bestCombo: Math.max(run.bestCombo, nextCombo),
+      shieldCharges: isCorrect
+        ? run.shieldCharges + (task.modifier === 'shield' ? 1 : 0)
+        : Math.max(0, run.shieldCharges - (shieldProtectedMiss ? 1 : 0)),
+      doublePointsLeft: isCorrect
+        ? task.modifier === 'double3'
+          ? 3
+          : Math.max(0, run.doublePointsLeft - (hasDoublePoints ? 1 : 0))
+        : run.doublePointsLeft
     };
     setAttemptHistory((prev) => [
       ...prev.slice(-(MAX_ATTEMPT_HISTORY - 1)),
@@ -151,7 +170,7 @@ export const useMathTrainer = () => {
     ]);
 
     const mode = modeRegistry.find((item) => item.id === run.modeId);
-    if (mode?.failEndsRun && !isCorrect) {
+    if (mode?.failEndsRun && !isCorrect && !shieldProtectedMiss) {
       setRun(nextRun);
       setFlow(nextFlow);
       setLastFeedback(`❌ Mistake. Correct answer: ${task.answer}`);
@@ -171,7 +190,13 @@ export const useMathTrainer = () => {
 
     setRun(nextRun);
     setFlow(nextFlow);
-    setLastFeedback(isCorrect ? `✅ +${scored.scoreDelta} combo x${nextRun.combo}` : `⚠️ ${task.answer}`);
+    const modifierFeedback = isCorrect && task.modifier !== 'normal' ? ` [${task.modifierLabel}]` : '';
+    const shieldFeedback = shieldProtectedMiss ? ' (shield saved combo)' : '';
+    setLastFeedback(
+      isCorrect
+        ? `✅ +${effectiveScoreDelta} combo x${nextRun.combo}${modifierFeedback}`
+        : `⚠️ ${task.answer}${shieldFeedback}`
+    );
     soundManager.play(isCorrect ? 'reward' : 'click');
     spawnTask(nextFlow);
   };
