@@ -14,19 +14,20 @@ export const RegisterPage = () => {
     e.preventDefault();
     const response = await gameApi.register(email, password, displayName);
     setToken(response.data.token);
-    navigate('/game');
+    navigate('/dashboard');
   };
 
   return (
-    <div className="layout card">
-      <h2>Register</h2>
+    <div className="layout card auth-card">
+      <h2>Регистрация</h2>
       <form onSubmit={submit} className="row">
         <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
         <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Display name" />
         <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
-        <button type="submit">Create</button>
+        <button type="submit">Создать аккаунт</button>
       </form>
-      <p><Link to="/">Back to login</Link></p>
+      <p><Link to="/login">Уже есть аккаунт? Войти</Link></p>
+      <p><Link to="/">← На главную</Link></p>
     </div>
   );
 };
