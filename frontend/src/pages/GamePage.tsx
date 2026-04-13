@@ -28,7 +28,11 @@ export const GamePage = () => {
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    if (selectedMode && availableModes.some((mode) => mode.id === selectedMode)) {
+    if (
+      selectedMode &&
+      modeId !== selectedMode &&
+      availableModes.some((mode) => mode.id === selectedMode)
+    ) {
       startRun(selectedMode as typeof modeId);
     }
   }, [selectedMode, availableModes, startRun, modeId]);
