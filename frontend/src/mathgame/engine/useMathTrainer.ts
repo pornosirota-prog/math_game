@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { FlowState, GameModeId, GeneratedTask, LeaderboardRecord, RunState, TaskAttempt } from '../domain/types';
+import type { FlowState, GameModeId, GeneratedTask, LeaderboardRecord, RunState, TaskAttempt, TaskKind } from '../domain/types';
 import { modeRegistry, defaultModeId } from '../systems/ModeRegistry';
 import { TaskFactory } from '../generators/TaskFactory';
 import { DifficultyEngine } from '../systems/DifficultyEngine';
@@ -29,6 +29,8 @@ export interface AttemptSnapshot {
 }
 
 const MAX_ATTEMPT_HISTORY = 24;
+const taskKindsForMode = (currentModeId: GameModeId, unlockedTaskKinds: TaskKind[]): TaskKind[] =>
+  currentModeId === 'equations' ? ['equation'] : unlockedTaskKinds;
 
 const notifyRunFinished = (score: number, accuracy: number) => {
   const { notificationsEnabled } = useSettingsStore.getState();
@@ -86,8 +88,8 @@ export const useMathTrainer = () => {
   const activeMode = modeRegistry.find((item) => item.id === modeId) ?? modeRegistry[0];
   const difficultyEngine = useMemo(() => new DifficultyEngine(activeMode.adaptiveSmoothing), [activeMode.adaptiveSmoothing]);
 
-  const spawnTask = (state: FlowState = flow) => {
-    const next = taskFactory.next(state, progress.unlockedTaskKinds);
+  const spawnTask = (state: FlowState = flow, nextModeId: GameModeId = modeId) => {
+    const next = taskFactory.next(state, taskKindsForMode(nextModeId, progress.unlockedTaskKinds), nextModeId === 'equations' ? 'equation' : undefined);
     setTask(next);
     setStartedAt(Date.now());
   };
@@ -106,7 +108,11 @@ export const useMathTrainer = () => {
     setIsFinished(false);
     setAttemptHistory([]);
     setLastFeedback('Flow started');
-    const nextTask = taskFactory.next(seededFlow, progress.unlockedTaskKinds);
+    const nextTask = taskFactory.next(
+      seededFlow,
+      taskKindsForMode(nextModeId, progress.unlockedTaskKinds),
+      nextModeId === 'equations' ? 'equation' : undefined
+    );
     setTask(nextTask);
     setStartedAt(Date.now());
     soundManager.play('click');
@@ -217,7 +223,7 @@ export const useMathTrainer = () => {
         : `⚠️ ${task.answer}${shieldFeedback}`
     );
     soundManager.play(isCorrect ? 'reward' : 'click');
-    spawnTask(nextFlow);
+    spawnTask(nextFlow, run.modeId);
   };
 
   useEffect(() => {

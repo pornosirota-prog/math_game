@@ -8,8 +8,8 @@ export class TaskFactory {
   private equations = new EquationTaskGenerator();
   private selector = new NextExampleSelector();
 
-  next(flow: FlowState, unlockedTaskKinds: TaskKind[]): GeneratedTask {
-    const template = this.selector.pick(flow, unlockedTaskKinds);
+  next(flow: FlowState, unlockedTaskKinds: TaskKind[], forcedTaskKind?: TaskKind): GeneratedTask {
+    const template = this.selector.pick(flow, unlockedTaskKinds, forcedTaskKind);
     const base =
       template.taskKind === 'equation'
         ? this.equations.generate(template, flow.difficultyScore)

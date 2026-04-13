@@ -4,13 +4,15 @@ const rndInt = (min: number, max: number) => Math.floor(Math.random() * (max - m
 
 export class EquationTaskGenerator {
   generate(template: DifficultyTemplate, difficultyScore: number): GeneratedTask {
-    const x = rndInt(2, 20);
-    const offset = rndInt(1, 15);
-    const left = x + offset;
+    const x = rndInt(template.numberSpecs[0]?.min ?? 2, template.numberSpecs[0]?.max ?? 20);
+    const offset = rndInt(template.numberSpecs[1]?.min ?? 1, template.numberSpecs[1]?.max ?? 15);
+    const operation = template.operations[Math.floor(Math.random() * template.operations.length)] ?? '+';
+    const left = operation === '-' ? x - offset : x + offset;
+    const prompt = operation === '-' ? `x - ${offset} = ${left}` : `x + ${offset} = ${left}`;
     return {
       id: crypto.randomUUID(),
       kind: 'equation',
-      prompt: `x + ${offset} = ${left}`,
+      prompt,
       answer: x,
       difficultyRating: Number((template.tier + difficultyScore / 20).toFixed(2)),
       timeLimitMs: Math.max(3000, Math.round(template.expectedTimeMs * 1.3)),
