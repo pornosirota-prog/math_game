@@ -34,6 +34,13 @@ export const modeRegistry: GameMode[] = [
     title: 'Infinite',
     description: 'Endless training for flow and mastery.',
     adaptiveSmoothing: 0.12
+  },
+  {
+    id: 'equations',
+    title: 'Equations',
+    description: 'Solve linear equations in adaptive flow.',
+    initialDurationMs: 90_000,
+    adaptiveSmoothing: 0.17
   }
 ];
 

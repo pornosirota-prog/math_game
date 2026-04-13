@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
+import { modeRegistry } from '../mathgame/systems/ModeRegistry';
 
 const percent = (value: number) => `${Math.round(value * 100)}%`;
 
@@ -18,7 +19,6 @@ export const GamePage = () => {
     isFinished,
     lastFeedback,
     modeId,
-    availableModes,
     startRun,
     submitAnswer,
     activeMode
@@ -31,11 +31,11 @@ export const GamePage = () => {
     if (
       selectedMode &&
       modeId !== selectedMode &&
-      availableModes.some((mode) => mode.id === selectedMode)
+      modeRegistry.some((mode) => mode.id === selectedMode)
     ) {
       startRun(selectedMode as typeof modeId);
     }
-  }, [selectedMode, availableModes, startRun, modeId]);
+  }, [selectedMode, startRun, modeId]);
 
   if (!selectedMode) return <Navigate to="/modes" replace />;
 

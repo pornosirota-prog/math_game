@@ -7,14 +7,14 @@ export const defaultProgress: PlayerMetaProgress = {
   xp: 0,
   totalRuns: 0,
   bestScore: 0,
-  unlockedModes: ['classic', 'sprint60'],
+  unlockedModes: ['classic', 'sprint60', 'equations'],
   unlockedTaskKinds: ['arithmetic'],
   achievements: [],
   dailyChallengeStreak: 0
 };
 
 const unlockModesByLevel = (level: number): GameModeId[] => {
-  const base: GameModeId[] = ['classic', 'sprint60'];
+  const base: GameModeId[] = ['classic', 'sprint60', 'equations'];
   if (level >= 3) base.push('twenty');
   if (level >= 5) base.push('streak');
   if (level >= 7) base.push('infinite');

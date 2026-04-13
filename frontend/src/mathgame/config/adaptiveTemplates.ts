@@ -108,6 +108,36 @@ export const templates: DifficultyTemplate[] = [
     expectedTimeMs: 5900,
     allowNegativeResult: false,
     challengeWeight: 1.1
+  },
+  {
+    id: 'eq_tier3_linear_add',
+    tier: 3,
+    label: 'Уравнения: x + b = c',
+    taskKind: 'equation',
+    operations: ['+'],
+    numberSpecs: [{ min: 2, max: 20 }, { min: 1, max: 15 }],
+    expectedTimeMs: 3300,
+    allowNegativeResult: false
+  },
+  {
+    id: 'eq_tier6_linear_sub',
+    tier: 6,
+    label: 'Уравнения: x - b = c',
+    taskKind: 'equation',
+    operations: ['-'],
+    numberSpecs: [{ min: 5, max: 50 }, { min: 1, max: 20 }],
+    expectedTimeMs: 4200,
+    allowNegativeResult: false
+  },
+  {
+    id: 'eq_tier9_linear_mix',
+    tier: 9,
+    label: 'Уравнения: смешанный вид',
+    taskKind: 'equation',
+    operations: ['+', '-'],
+    numberSpecs: [{ min: 15, max: 80 }, { min: 2, max: 30 }],
+    expectedTimeMs: 5200,
+    allowNegativeResult: true
   }
 ];
 

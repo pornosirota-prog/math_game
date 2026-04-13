@@ -13,7 +13,10 @@ export type TemplateId =
   | 'tier7_three_double_add'
   | 'tier8_two_double_one_triple'
   | 'tier9_three_triple_add'
-  | 'tier10_mixed_ops';
+  | 'tier10_mixed_ops'
+  | 'eq_tier3_linear_add'
+  | 'eq_tier6_linear_sub'
+  | 'eq_tier9_linear_mix';
 
 export interface NumberSpec {
   min: number;
@@ -59,7 +62,7 @@ export interface TaskAttempt {
   expectedTimeMs: number;
 }
 
-export type GameModeId = 'classic' | 'infinite' | 'streak' | 'sprint60' | 'twenty';
+export type GameModeId = 'classic' | 'infinite' | 'streak' | 'sprint60' | 'twenty' | 'equations';
 
 export interface GameMode {
   id: GameModeId;
