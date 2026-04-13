@@ -1,5 +1,4 @@
 export interface PlayerProfile {
-  id: number;
   email: string;
   displayName: string;
   level: number;

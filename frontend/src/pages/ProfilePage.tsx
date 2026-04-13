@@ -14,7 +14,6 @@ export const ProfilePage = () => {
   return (
     <div className="layout card">
       <h2>Profile</h2>
-      <p>ID: {profile.id}</p>
       <p>Email: {profile.email}</p>
       <p>Name: {profile.displayName}</p>
       <p>Created: {new Date(profile.createdAt).toLocaleString()}</p>

@@ -9,7 +9,6 @@ import java.time.Instant;
  */
 @Data
 public class PlayerProfileDto {
-    private Long id;
     private String email;
     private String displayName;
     private int level;
