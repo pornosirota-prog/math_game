@@ -71,7 +71,8 @@ export class ArithmeticTaskGenerator {
       timeLimitMs: Math.round(template.expectedTimeMs * 1.5),
       templateId: template.id,
       tier: template.tier,
-      expectedTimeMs: template.expectedTimeMs
+      expectedTimeMs: template.expectedTimeMs,
+      modifier: 'normal'
     };
   }
 }

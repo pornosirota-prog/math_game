@@ -121,11 +121,14 @@ export const GamePage = () => {
         <div><strong>Tier:</strong> {flow.currentTier}</div>
         <div><strong>Difficulty:</strong> {Math.round(flow.difficultyScore)}</div>
         <div><strong>Accuracy:</strong> {percent(flow.accuracyRate)}</div>
+        <div><strong>Shield:</strong> {run.shieldCharges}</div>
+        <div><strong>x2 Charges:</strong> {run.doublePointsLeft}</div>
         {typeof run.remainingMs === 'number' && <div><strong>Time:</strong> {(run.remainingMs / 1000).toFixed(1)}s</div>}
       </div>
 
       {!isFinished && task && (
         <div className="card arena-card">
+          {task.modifier !== 'normal' && <div className="feedback">{task.modifierLabel}</div>}
           <div className="prompt">{task.prompt}</div>
           <form onSubmit={onSubmit} className="answer-form">
             <input

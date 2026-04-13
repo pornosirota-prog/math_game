@@ -1,6 +1,7 @@
 export type Operation = '+' | '-' | '*' | '/';
 
 export type TaskKind = 'arithmetic' | 'equation';
+export type TaskModifier = 'normal' | 'golden' | 'blitz' | 'shield' | 'double3';
 
 export type TemplateId =
   | 'tier1_two_single_add'
@@ -42,6 +43,8 @@ export interface GeneratedTask {
   templateId: TemplateId;
   tier: number;
   expectedTimeMs: number;
+  modifier: TaskModifier;
+  modifierLabel?: string;
 }
 
 export interface TaskAttempt {
@@ -92,6 +95,8 @@ export interface RunState {
   startedAt: number;
   endsAt?: number;
   remainingMs?: number;
+  shieldCharges: number;
+  doublePointsLeft: number;
 }
 
 export interface PlayerMetaProgress {
