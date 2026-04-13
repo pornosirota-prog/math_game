@@ -57,22 +57,14 @@ export const GamePage = () => {
   });
 
   return (
-    <div className="layout math-layout">
-      <section className="card">
-        <h2>{activeMode.title}</h2>
-        <p>{activeMode.description}</p>
-        <div className="hud-grid neon-grid">
-          <div><strong>Score:</strong> {run.score}</div>
-          <div><strong>Combo:</strong> x{run.combo}</div>
-          <div><strong>Tier:</strong> {flow.currentTier}</div>
-          <div><strong>Difficulty:</strong> {Math.round(flow.difficultyScore)}</div>
-          <div><strong>Accuracy:</strong> {percent(flow.accuracyRate)}</div>
-          {typeof run.remainingMs === 'number' && <div><strong>Time:</strong> {(run.remainingMs / 1000).toFixed(1)}s</div>}
+    <div className="layout math-layout trainer-game">
+      <section className="trainer-progress-wrap">
+        <div className="trainer-progress">
+          <div style={{ width: percent(flow.accuracyRate) }} />
         </div>
       </section>
-
       {!isFinished && task && (
-        <div className="card arena-card">
+        <div className="trainer-problem-wrap">
           <div className="prompt">{task.prompt}</div>
           <form onSubmit={onSubmit} className="answer-form">
             <input
@@ -82,10 +74,11 @@ export const GamePage = () => {
               placeholder={isPaused ? 'Игра на паузе' : 'Введите ответ и нажмите Enter'}
               disabled={isPaused}
             />
-            <button type="submit" disabled={isPaused}>Ответить</button>
+            <button type="submit" disabled={isPaused}>✓</button>
           </form>
-          <div className="feedback">{isPaused ? 'Пауза' : lastFeedback}</div>
-          <div className="row">
+          <div className="trainer-qmark">?</div>
+          <div className="feedback">{isPaused ? 'Пауза' : lastFeedback || '\u00A0'}</div>
+          <div className="row trainer-control-row">
             <button type="button" onClick={() => setIsPaused((prev) => !prev)}>{isPaused ? 'Продолжить' : 'Пауза'}</button>
             <button type="button" onClick={goToResults}>Завершить игру</button>
           </div>
@@ -105,14 +98,14 @@ export const GamePage = () => {
         </div>
       )}
 
-      <div className="card stats-overview-grid">
+      <div className="card stats-overview-grid trainer-stats">
         <div className="stat-pill"><span>Уровень</span><strong>{progress.level}</strong></div>
         <div className="stat-pill"><span>Лучший счёт</span><strong>{progress.bestScore}</strong></div>
         <div className="stat-pill"><span>Попыток</span><strong>{attemptHistory.length}</strong></div>
         <div className="stat-pill"><span>Запусков</span><strong>{progress.totalRuns}</strong></div>
       </div>
 
-      <div className="card">
+      <div className="card trainer-board">
         <h3>Client Leaderboard</h3>
         <ol>
           {leaderboard.slice(0, 8).map((entry) => (
