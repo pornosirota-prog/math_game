@@ -7,6 +7,7 @@ import { ScoreSystem } from '../systems/ScoreSystem';
 import { ProgressionSystem } from '../systems/ProgressionSystem';
 import { addLeaderboardRecord, loadLeaderboard, loadProgress, saveProgress } from '../storage/localStorageRepo';
 import { soundManager } from '../../sound/soundManager';
+import { useSettingsStore } from '../../store/settingsStore';
 
 import { createInitialMastery, tierByDifficultyScore } from '../config/adaptiveTemplates';
 
@@ -28,6 +29,23 @@ export interface AttemptSnapshot {
 }
 
 const MAX_ATTEMPT_HISTORY = 24;
+
+const notifyRunFinished = (score: number, accuracy: number) => {
+  const { notificationsEnabled } = useSettingsStore.getState();
+  if (!notificationsEnabled || typeof window === 'undefined' || !('Notification' in window)) return;
+
+  if (Notification.permission === 'granted') {
+    // eslint-disable-next-line no-new
+    new Notification('Run завершён', {
+      body: `Счёт: ${score}. Точность: ${Math.round(accuracy * 100)}%.`
+    });
+    return;
+  }
+
+  if (Notification.permission === 'default') {
+    void Notification.requestPermission();
+  }
+};
 
 const buildRunState = (modeId: GameModeId): RunState => {
   const mode = modeRegistry.find((item) => item.id === modeId);
@@ -113,6 +131,7 @@ export const useMathTrainer = () => {
     };
     setLeaderboard(addLeaderboardRecord(record));
     setIsFinished(true);
+    notifyRunFinished(finalRun.score, accuracy);
   };
 
   const submitAnswer = (rawInput: string) => {

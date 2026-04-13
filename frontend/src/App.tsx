@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -9,6 +10,7 @@ import { ModeSelectionPage } from './pages/ModeSelectionPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ResultsPage } from './pages/ResultsPage';
 import { useAuthStore } from './store/authStore';
+import { useSettingsStore } from './store/settingsStore';
 
 const RequireAuth = ({ children }: { children: JSX.Element }) => {
   const token = useAuthStore((s) => s.token);
@@ -80,6 +82,12 @@ const AppShell = () => {
 };
 
 export default function App() {
+  const darkThemeEnabled = useSettingsStore((state) => state.darkThemeEnabled);
+
+  useEffect(() => {
+    document.body.classList.toggle('light-theme', !darkThemeEnabled);
+  }, [darkThemeEnabled]);
+
   return (
     <>
       <PublicHeader />
