@@ -6,9 +6,9 @@ const clampPercent = (value: number) => `${Math.max(4, Math.min(100, Math.round(
 const safeDivide = (value: number, divider: number) => (divider === 0 ? 0 : value / divider);
 
 const presets = [
-  { id: 'easy', label: 'Легко', skill: 2 },
-  { id: 'normal', label: 'Нормально', skill: 4.5 },
-  { id: 'hard', label: 'Сложно', skill: 7.5 }
+  { id: 'easy', label: 'Легко', score: 15 },
+  { id: 'normal', label: 'Нормально', score: 35 },
+  { id: 'hard', label: 'Сложно', score: 60 }
 ] as const;
 
 export const GamePage = () => {
@@ -90,7 +90,7 @@ export const GamePage = () => {
                 className={difficultyPreset === preset.id ? 'active-preset' : ''}
                 onClick={() => {
                   setDifficultyPreset(preset.id);
-                  startRun(modeId, preset.skill);
+                  startRun(modeId, preset.score);
                 }}
               >
                 {preset.label}
@@ -104,9 +104,9 @@ export const GamePage = () => {
         <div><strong>Score:</strong> {run.score}</div>
         <div><strong>Combo:</strong> x{run.combo}</div>
         <div><strong>Speed:</strong> x{run.speedMultiplier.toFixed(2)}</div>
-        <div><strong>Flow:</strong> {Math.round(flow.flow)}</div>
-        <div><strong>Difficulty:</strong> {flow.skill.toFixed(1)}</div>
-        <div><strong>Accuracy:</strong> {percent(flow.accuracy)}</div>
+        <div><strong>Tier:</strong> {flow.currentTier}</div>
+        <div><strong>Difficulty:</strong> {Math.round(flow.difficultyScore)}</div>
+        <div><strong>Accuracy:</strong> {percent(flow.accuracyRate)}</div>
         {typeof run.remainingMs === 'number' && <div><strong>Time:</strong> {(run.remainingMs / 1000).toFixed(1)}s</div>}
       </div>
 
@@ -201,8 +201,8 @@ export const GamePage = () => {
                     <div
                       key={`skill-${index}`}
                       className="metric-bar skill"
-                      style={{ height: clampPercent((item.skill / 10) * 100) }}
-                      title={`#${index + 1}: ${item.skill.toFixed(1)}`}
+                      style={{ height: clampPercent(item.difficultyScore) }}
+                      title={`#${index + 1}: ${Math.round(item.difficultyScore)}`}
                     />
                   ))}
                 </div>

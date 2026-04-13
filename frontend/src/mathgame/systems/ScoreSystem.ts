@@ -8,10 +8,10 @@ export class ScoreSystem {
       return { scoreDelta: -8, nextCombo: 0, speedMultiplier: 1 };
     }
 
-    const timeFactor = clamp(1.7 - attempt.answerMs / 5000, 0.55, 1.7);
+    const timeFactor = clamp(1.7 - attempt.answerMs / Math.max(2200, attempt.expectedTimeMs * 1.2), 0.55, 1.7);
     const comboFactor = 1 + Math.min(1.4, combo * 0.06);
     const difficultyFactor = 1 + attempt.difficultyRating / 25;
-    const speedMultiplier = Number((timeFactor + flow.flow / 220).toFixed(2));
+    const speedMultiplier = Number((timeFactor + flow.difficultyScore / 180).toFixed(2));
 
     const raw = 20 * timeFactor * comboFactor * difficultyFactor;
     return {
