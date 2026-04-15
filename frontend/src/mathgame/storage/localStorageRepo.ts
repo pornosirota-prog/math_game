@@ -7,6 +7,7 @@ const STATS_KEY = 'mathflow.stats.v1';
 const SESSIONS_KEY = 'mathflow.sessions.v1';
 const DAILY_CHALLENGE_KEY = 'mathflow.daily.v1';
 const TOKEN_KEY = 'token';
+const LAST_SCOPE_KEY = 'mathflow.scope.v1';
 
 const decodeBase64Url = (value: string) => {
   const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
@@ -14,24 +15,52 @@ const decodeBase64Url = (value: string) => {
   return atob(padded);
 };
 
+const normalizeScope = (scopeCandidate: unknown): string | null => {
+  if (typeof scopeCandidate !== 'string') return null;
+  const normalized = scopeCandidate.trim().toLowerCase();
+  if (!normalized) return null;
+  return normalized.replace(/[^a-z0-9._@-]/g, '_');
+};
+
+const getScopedKey = (key: string, scope: string) => `${key}:${scope}`;
+
+const migrateGuestDataToScope = (scope: string) => {
+  if (scope === 'guest') return;
+
+  const keysToMigrate = [PROGRESS_KEY, STATS_KEY, SESSIONS_KEY, DAILY_CHALLENGE_KEY];
+  keysToMigrate.forEach((key) => {
+    const scopeKey = getScopedKey(key, scope);
+    if (localStorage.getItem(scopeKey)) return;
+    const guestValue = localStorage.getItem(getScopedKey(key, 'guest'));
+    if (guestValue) {
+      localStorage.setItem(scopeKey, guestValue);
+    }
+  });
+};
+
 const resolveStorageScope = (): string => {
   try {
     const token = sessionStorage.getItem(TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY);
-    if (!token) return 'guest';
-    const payloadPart = token.split('.')[1];
-    if (!payloadPart) return 'guest';
-    const payload = JSON.parse(decodeBase64Url(payloadPart)) as Record<string, unknown>;
-    const scopeCandidate = payload.sub ?? payload.email ?? payload.userId;
-    if (typeof scopeCandidate !== 'string') return 'guest';
-    const normalized = scopeCandidate.trim().toLowerCase();
-    if (!normalized) return 'guest';
-    return normalized.replace(/[^a-z0-9._@-]/g, '_');
+    if (token) {
+      const payloadPart = token.split('.')[1];
+      if (payloadPart) {
+        const payload = JSON.parse(decodeBase64Url(payloadPart)) as Record<string, unknown>;
+        const resolved = normalizeScope(payload.sub ?? payload.email ?? payload.userId);
+        if (resolved) {
+          migrateGuestDataToScope(resolved);
+          localStorage.setItem(LAST_SCOPE_KEY, resolved);
+          return resolved;
+        }
+      }
+    }
   } catch {
-    return 'guest';
+    // ignore and fallback to remembered scope below
   }
+
+  return localStorage.getItem(LAST_SCOPE_KEY) ?? 'guest';
 };
 
-export const scopedStorageKey = (key: string) => `${key}:${resolveStorageScope()}`;
+export const scopedStorageKey = (key: string) => getScopedKey(key, resolveStorageScope());
 
 export interface GameSessionRecord {
   id: string;
