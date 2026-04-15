@@ -13,7 +13,7 @@ const modes: Array<{ id: GameModeId; title: string; description: string; difficu
 ];
 
 export const ModeSelectionPage = () => {
-  usePageMeta('Режимы — Math Game', 'Выберите игровой режим: Classic, Sprint, No-Miss Streak, 20 Tasks, Infinite и Equations.');
+  usePageMeta('Режимы — Math Game', 'Выберите игровой режим: Classic, Sprint, No-Miss Streak, 20 Tasks, Infinite и Equations.', { noindex: true });
 
   const { stats, progress } = useMathTrainer({ autoStart: false });
 

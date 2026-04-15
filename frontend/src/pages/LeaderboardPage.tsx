@@ -3,7 +3,7 @@ import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
 import { usePageMeta } from '../hooks/usePageMeta';
 
 export const LeaderboardPage = () => {
-  usePageMeta('Рейтинг — Math Game', 'Лидерборд игроков без дублей: количество игр, лучший счёт и уровень.');
+  usePageMeta('Рейтинг — Math Game', 'Лидерборд игроков без дублей: количество игр, лучший счёт и уровень.', { noindex: true });
 
   const { leaderboard } = useMathTrainer({ autoStart: false });
 

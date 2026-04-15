@@ -13,7 +13,7 @@ const themeOptions: Array<{ id: ThemeId; title: string; preview: string }> = [
 ];
 
 export const SettingsPage = () => {
-  usePageMeta('Настройки — Math Game', 'Настройки игры: смена тем с яркими визуальными вариантами оформления интерфейса.');
+  usePageMeta('Настройки — Math Game', 'Настройки игры: смена тем с яркими визуальными вариантами оформления интерфейса.', { noindex: true });
 
   const { themeId, setThemeId } = useSettingsStore();
 

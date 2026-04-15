@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { GOOGLE_OAUTH_URL } from '../config/api';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false" className="google-icon">
@@ -10,18 +11,22 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export const LoginPage = () => (
-  <div className="layout card auth-card">
-    <h2>Вход</h2>
-    <p>Авторизация доступна только через Google.</p>
+export const LoginPage = () => {
+  usePageMeta('Вход — Math Game', 'Вход в аккаунт Math Game через Google OAuth.', { noindex: true });
 
-    <a className="google-auth-button" href={GOOGLE_OAUTH_URL}>
-      <GoogleIcon />
-      <span>Продолжить через Google</span>
-    </a>
+  return (
+    <div className="layout card auth-card">
+      <h2>Вход</h2>
+      <p>Авторизация доступна только через Google.</p>
 
-    <div className="auth-links">
-      <Link to="/" className="auth-link-button ghost">← На главную</Link>
+      <a className="google-auth-button" href={GOOGLE_OAUTH_URL}>
+        <GoogleIcon />
+        <span>Продолжить через Google</span>
+      </a>
+
+      <div className="auth-links">
+        <Link to="/" className="auth-link-button ghost">← На главную</Link>
+      </div>
     </div>
-  </div>
-);
+  );
+};
