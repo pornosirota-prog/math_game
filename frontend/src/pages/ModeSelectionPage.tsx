@@ -5,15 +5,15 @@ import { usePageMeta } from '../hooks/usePageMeta';
 
 const modes: Array<{ id: GameModeId; title: string; description: string; difficulty: string; locked?: boolean }> = [
   { id: 'classic', title: 'Classic', description: 'Сбалансированный режим для ежедневной тренировки.', difficulty: 'Низкая' },
-  { id: 'sprint60', title: 'Sprint', description: 'Максимум очков за 60 секунд.', difficulty: 'Средняя' },
-  { id: 'streak', title: 'Survival', description: 'Ошибка завершает раунд.', difficulty: 'Высокая' },
-  { id: 'twenty', title: 'Streak', description: '20 задач на скорость и точность.', difficulty: 'Средняя' },
-  { id: 'infinite', title: 'Training', description: 'Бесконечный режим для обучения.', difficulty: 'Низкая' },
+  { id: 'sprint60', title: 'Sprint 60', description: 'Максимум очков за 60 секунд.', difficulty: 'Средняя' },
+  { id: 'streak', title: 'No-Miss Streak', description: 'Ошибка завершает раунд.', difficulty: 'Высокая' },
+  { id: 'twenty', title: '20 Tasks', description: '20 задач на скорость и точность.', difficulty: 'Средняя' },
+  { id: 'infinite', title: 'Infinite', description: 'Бесконечный режим для обучения.', difficulty: 'Низкая' },
   { id: 'equations', title: 'Equations', description: 'Алгебраические задания (planned).', difficulty: 'Высокая', locked: true }
 ];
 
 export const ModeSelectionPage = () => {
-  usePageMeta('Режимы — Math Game', 'Выберите игровой режим: Classic, Sprint, Survival, Streak, Training и Equations.');
+  usePageMeta('Режимы — Math Game', 'Выберите игровой режим: Classic, Sprint, No-Miss Streak, 20 Tasks, Infinite и Equations.');
 
   const { stats, progress } = useMathTrainer({ autoStart: false });
 

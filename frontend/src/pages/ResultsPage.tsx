@@ -15,7 +15,7 @@ interface ResultState {
 }
 
 export const ResultsPage = () => {
-  usePageMeta('Результаты — Math Game', 'Итоги раунда: счёт, точность, серия, скорость, опыт и рекомендации для следующей игры.');
+  usePageMeta('Результаты — Math Game', 'Итоги раунда: счёт, точность, серия, скорость, опыт и графики прогресса.');
 
   const location = useLocation();
   const state = (location.state as ResultState | null) ?? null;
@@ -23,6 +23,7 @@ export const ResultsPage = () => {
 
   const isNewRecord = Boolean(state && state.score >= stats.bestScore);
   const xpGain = state ? Math.max(50, Math.round(state.score * 0.08)) : 0;
+  const maxAnswered = state ? Math.max(1, state.answered) : 1;
 
   return (
     <div className="layout card">
@@ -39,6 +40,40 @@ export const ResultsPage = () => {
           <p>Прогресс daily challenge: {dailyChallenge.progressScore}/{dailyChallenge.targetScore}</p>
           <p>Выполненные челленджи: {dailyChallenge.completed ? '1' : '0'} сегодня</p>
           <p>Совет: попробуйте режим Sprint для тренировки скорости.</p>
+
+          <section className="quick-grid">
+            <article className="card">
+              <h3>Разбор ответов</h3>
+              <div className="mode-bar-row">
+                <strong>Правильно</strong>
+                <span>{state.correct} / {state.answered}</span>
+                <div className="xp-track">
+                  <div style={{ width: `${Math.round((state.correct / maxAnswered) * 100)}%` }} />
+                </div>
+              </div>
+              <div className="mode-bar-row">
+                <strong>Ошибки</strong>
+                <span>{state.incorrect} / {state.answered}</span>
+                <div className="xp-track">
+                  <div style={{ width: `${Math.round((state.incorrect / maxAnswered) * 100)}%` }} />
+                </div>
+              </div>
+            </article>
+
+            <article className="card">
+              <h3>Сравнение с лучшим</h3>
+              <div className="mode-bar-row">
+                <strong>Этот раунд</strong>
+                <span>{state.score} очков</span>
+                <div className="xp-track"><div style={{ width: `${Math.round((state.score / Math.max(1, stats.bestScore)) * 100)}%` }} /></div>
+              </div>
+              <div className="mode-bar-row">
+                <strong>Лучший рекорд</strong>
+                <span>{stats.bestScore} очков</span>
+                <div className="xp-track"><div style={{ width: '100%' }} /></div>
+              </div>
+            </article>
+          </section>
         </>
       ) : (
         <p>Сыграйте раунд, чтобы увидеть подробные результаты.</p>
