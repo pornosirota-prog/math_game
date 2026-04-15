@@ -1047,3 +1047,131 @@ input:focus {
     min-width: 560px;
   }
 }
+
+.public-topbar {
+  align-items: flex-start;
+}
+
+.public-nav-links {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.public-nav-links a {
+  border: 1px solid color-mix(in srgb, var(--card-border) 80%, #fff 20%);
+  background: color-mix(in srgb, var(--card) 78%, #fff 22%);
+  color: var(--text-primary);
+}
+
+.public-nav-links a.active {
+  border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.public-nav-links .public-login-link {
+  border-color: #2a7b2b;
+  color: #fff;
+  background: linear-gradient(120deg, #2f8f2e, #56af45);
+}
+
+.public-page-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.public-page-card h1 {
+  margin: 2px 0 12px;
+  font-size: clamp(1.8rem, 3.4vw, 2.7rem);
+}
+
+.public-page-lead {
+  font-size: 1.08rem;
+  color: var(--text-secondary);
+  margin-bottom: 18px;
+  max-width: 75ch;
+}
+
+.public-section {
+  padding-top: 8px;
+}
+
+.public-section h2 {
+  margin: 0 0 8px;
+}
+
+.public-section p,
+.public-section li {
+  line-height: 1.65;
+}
+
+.faq-list {
+  display: grid;
+  gap: 10px;
+}
+
+.faq-list details {
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.faq-list summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.public-ad-slot {
+  border: 1px dashed color-mix(in srgb, var(--primary) 55%, transparent);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px 0;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  color: var(--text-secondary);
+}
+
+.public-steps-list {
+  margin: 8px 0;
+  display: grid;
+  gap: 8px;
+  line-height: 1.6;
+}
+
+.text-link {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.public-links-card h2 {
+  margin-top: 0;
+}
+
+.public-links-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.public-links-grid a {
+  text-decoration: none;
+  color: var(--text-primary);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.public-links-grid a:hover {
+  border-color: color-mix(in srgb, var(--primary) 55%, transparent);
+}
+
+@media (max-width: 960px) {
+  .public-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .public-nav-links {
+    justify-content: flex-start;
+  }
+}
