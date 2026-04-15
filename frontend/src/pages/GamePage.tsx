@@ -4,7 +4,7 @@ import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
 import { modeRegistry } from '../mathgame/systems/ModeRegistry';
 
 const percent = (value: number) => `${Math.round(value * 100)}%`;
-const timerLabel = (remainingMs?: number) => (remainingMs ? `${Math.ceil(remainingMs / 1000)}с` : '∞');
+const timerLabel = (remainingMs?: number) => (typeof remainingMs === 'number' ? `${Math.ceil(remainingMs / 1000)}с` : '∞');
 
 export const GamePage = () => {
   const navigate = useNavigate();
@@ -55,6 +55,7 @@ export const GamePage = () => {
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!isRoundStarted || isPaused) return;
+    if (!input.trim()) return;
     submitAnswer(input);
     setInput('');
   };
@@ -62,10 +63,12 @@ export const GamePage = () => {
   const onInputChange = (value: string) => {
     setInput(value);
     if (isPaused || !task || !isRoundStarted) return;
-    const numeric = Number(value.replace(',', '.'));
+    const normalizedValue = value.trim();
+    if (!normalizedValue) return;
+    const numeric = Number(normalizedValue.replace(',', '.'));
     const isCorrect = Number.isFinite(numeric) && Math.abs(numeric - task.answer) < 0.01;
     if (!isCorrect) return;
-    submitAnswer(value);
+    submitAnswer(normalizedValue);
     setInput('');
   };
 

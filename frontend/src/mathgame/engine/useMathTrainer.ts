@@ -189,15 +189,18 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
   const submitAnswer = (rawInput: string) => {
     if (!task || isFinished) return;
 
+    const normalizedInput = rawInput.trim();
+    if (!normalizedInput) return;
+
     const elapsed = Date.now() - startedAt;
-    const numeric = Number(rawInput.replace(',', '.'));
+    const numeric = Number(normalizedInput.replace(',', '.'));
     const isCorrect = Number.isFinite(numeric) && Math.abs(numeric - task.answer) < 0.01;
 
     const attempt: TaskAttempt = {
       taskId: task.id,
       isCorrect,
       answerMs: elapsed,
-      inputValue: rawInput,
+      inputValue: normalizedInput,
       expected: task.answer,
       difficultyRating: task.difficultyRating,
       templateId: task.templateId,
