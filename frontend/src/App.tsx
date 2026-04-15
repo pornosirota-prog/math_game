@@ -11,6 +11,8 @@ import { SettingsPage } from './pages/SettingsPage';
 import { ResultsPage } from './pages/ResultsPage';
 import { useAuthStore } from './store/authStore';
 import { useSettingsStore } from './store/settingsStore';
+import { SiteFooter } from './components/footer/SiteFooter';
+import { InfoPage } from './pages/info/InfoPage';
 
 const RequireAuth = ({ children }: { children: JSX.Element }) => {
   const token = useAuthStore((s) => s.token);
@@ -39,7 +41,7 @@ const PublicHeader = () => {
       <div className="nav-links">
         {!token && <NavLink to="/login">Войти</NavLink>}
         {!token && <NavLink to="/register">Регистрация</NavLink>}
-        {token && <NavLink to="/dashboard">Кабинет</NavLink>}
+        {token && <NavLink to="/dashboard">Главная</NavLink>}
       </div>
     </header>
   );
@@ -52,18 +54,22 @@ const AppShell = () => {
     <div className="trainer-shell">
       <header className="trainer-toolbar">
         <nav className="trainer-nav-left">
-          <NavLink to="/dashboard">☰</NavLink>
+          <NavLink to="/dashboard">Главная</NavLink>
+          <NavLink to="/game?mode=classic">Играть</NavLink>
           <NavLink to="/modes">Режимы</NavLink>
+          <NavLink to="/leaderboard">Рейтинг</NavLink>
+          <NavLink to="/achievements">Достижения</NavLink>
+          <NavLink to="/profile">Профиль</NavLink>
+          <NavLink to="/settings">Настройки</NavLink>
         </nav>
         <strong className="trainer-toolbar-title">MATH GAME</strong>
         <details className="profile-dropdown">
-          <summary>☰</summary>
+          <summary>Профиль ▾</summary>
           <div className="dropdown-menu">
-            <NavLink to="/game?mode=classic">Играть</NavLink>
-            <NavLink to="/results">Результаты</NavLink>
             <NavLink to="/profile">Профиль</NavLink>
             <NavLink to="/settings">Настройки</NavLink>
-            <button type="button" onClick={() => setToken(null)}>Выйти</button>
+            <NavLink to="/results">Последний результат</NavLink>
+            <button type="button" onClick={() => setToken(null)}>Logout</button>
           </div>
         </details>
       </header>
@@ -76,6 +82,7 @@ const AppShell = () => {
 
 export default function App() {
   const darkThemeEnabled = useSettingsStore((state) => state.darkThemeEnabled);
+  const token = useAuthStore((state) => state.token);
 
   useEffect(() => {
     document.body.classList.toggle('light-theme', !darkThemeEnabled);
@@ -85,7 +92,7 @@ export default function App() {
     <>
       <PublicHeader />
       <Routes>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={token ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
@@ -104,9 +111,19 @@ export default function App() {
           <Route path="results" element={<ResultsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="leaderboard" element={<InfoPage title="Leaderboard" body="Раздел рейтинга готов для подключения серверной таблицы лидеров." />} />
+          <Route path="achievements" element={<InfoPage title="Achievements" body="Здесь будут детальные карточки достижений и прогресс по бейджам." />} />
         </Route>
+
+        <Route path="/about" element={<InfoPage title="About" body="Math Game помогает развивать скорость счёта через игровые раунды." />} />
+        <Route path="/faq" element={<InfoPage title="FAQ" body="Скоро здесь появятся ответы на частые вопросы пользователей." />} />
+        <Route path="/privacy" element={<InfoPage title="Privacy Policy" body="Черновик политики конфиденциальности для будущего публичного запуска." />} />
+        <Route path="/terms" element={<InfoPage title="Terms" body="Черновик пользовательского соглашения." />} />
+        <Route path="/support" element={<InfoPage title="Support" body="Свяжитесь с нами: support@mathgame.local" />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <SiteFooter />
     </>
   );
 }
