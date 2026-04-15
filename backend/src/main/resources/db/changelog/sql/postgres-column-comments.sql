@@ -1,0 +1,20 @@
+COMMENT ON TABLE players IS 'Игроки игры';
+COMMENT ON COLUMN players.id IS 'Уникальный идентификатор игрока';
+COMMENT ON COLUMN players.email IS 'Email игрока (логин)';
+COMMENT ON COLUMN players.display_name IS 'Отображаемое имя игрока';
+COMMENT ON COLUMN players.password_hash IS 'Хэш пароля для локальной авторизации';
+COMMENT ON COLUMN players.auth_provider IS 'Провайдер авторизации';
+COMMENT ON COLUMN players.level IS 'Текущий уровень игрока';
+COMMENT ON COLUMN players.experience IS 'Текущее количество опыта';
+COMMENT ON COLUMN players.coins IS 'Баланс монет';
+COMMENT ON COLUMN players.energy IS 'Текущая энергия';
+COMMENT ON COLUMN players.last_daily_claim_at IS 'Время последнего дневного бонуса';
+COMMENT ON COLUMN players.created_at IS 'Время создания записи';
+COMMENT ON COLUMN players.updated_at IS 'Время последнего обновления записи';
+
+COMMENT ON TABLE active_boosts IS 'Активные бусты игрока';
+COMMENT ON COLUMN active_boosts.id IS 'Уникальный идентификатор буста';
+COMMENT ON COLUMN active_boosts.player_id IS 'Ссылка на игрока';
+COMMENT ON COLUMN active_boosts.type IS 'Тип буста';
+COMMENT ON COLUMN active_boosts.multiplier IS 'Множитель эффекта буста';
+COMMENT ON COLUMN active_boosts.expires_at IS 'Время окончания действия буста';

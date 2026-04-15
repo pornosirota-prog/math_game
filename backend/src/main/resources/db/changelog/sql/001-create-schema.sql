@@ -21,6 +21,3 @@ CREATE TABLE active_boosts (
     expires_at TIMESTAMP NOT NULL,
     CONSTRAINT fk_boost_player FOREIGN KEY (player_id) REFERENCES players(id)
 );
-
-INSERT INTO players (email, display_name, password_hash, auth_provider, level, experience, coins, energy, created_at, updated_at)
-VALUES ('demo@game.local', 'DemoPlayer', '$2a$10$4QxBqg0x5H.Kq8XNYQXWxe9f/68kYjgm2iUZfM7WmfLw4f8gFvF8S', 'LOCAL', 1, 0, 100, 20, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
