@@ -2,11 +2,11 @@ package com.example.idlegame.security;
 
 import com.example.idlegame.entity.Player;
 import com.example.idlegame.entity.enums.AuthProvider;
+import com.example.idlegame.config.AppUrlProperties;
 import com.example.idlegame.repository.PlayerRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -21,13 +21,13 @@ import java.io.IOException;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final PlayerRepository playerRepository;
     private final JwtService jwtService;
-    private final String frontendBaseUrl;
+    private final AppUrlProperties appUrlProperties;
 
     public OAuth2LoginSuccessHandler(PlayerRepository playerRepository, JwtService jwtService,
-                                     @Value("${app.frontend.base-url}") String frontendBaseUrl) {
+                                     AppUrlProperties appUrlProperties) {
         this.playerRepository = playerRepository;
         this.jwtService = jwtService;
-        this.frontendBaseUrl = frontendBaseUrl;
+        this.appUrlProperties = appUrlProperties;
     }
 
     @Override
@@ -46,6 +46,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .energy(20)
                 .build()));
         String token = jwtService.generateToken(player.getEmail());
-        response.sendRedirect(frontendBaseUrl + "/oauth-success?token=" + token);
+        response.sendRedirect(appUrlProperties.getFrontendBaseUrl() + "/oauth-success?token=" + token);
     }
 }

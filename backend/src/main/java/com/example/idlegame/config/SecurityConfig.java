@@ -2,7 +2,6 @@ package com.example.idlegame.config;
 
 import com.example.idlegame.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,8 +27,11 @@ import java.util.List;
  */
 @Configuration
 public class SecurityConfig {
-    @Value("${app.frontend.base-url}")
-    private String frontendBaseUrl;
+    private final AppUrlProperties appUrlProperties;
+
+    public SecurityConfig(AppUrlProperties appUrlProperties) {
+        this.appUrlProperties = appUrlProperties;
+    }
 
     /**
      * Password encoder bean.
@@ -70,7 +72,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(frontendBaseUrl));
+        configuration.setAllowedOrigins(List.of(appUrlProperties.getFrontendBaseUrl()));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));
