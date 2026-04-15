@@ -4,6 +4,7 @@ spring:
     username: ${DB_USERNAME:sa}
     password: ${DB_PASSWORD:}
     driver-class-name: ${DB_DRIVER:org.h2.Driver}
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -11,22 +12,36 @@ spring:
       hibernate:
         format_sql: true
     open-in-view: false
+
   h2:
     console:
       enabled: true
       path: /h2-console
+
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
     contexts: ${LIQUIBASE_CONTEXTS:local}
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+
 app:
   security:
     jwt:
-      secret: "replace-with-long-secret-key-at-least-32-bytes-123456"
+      secret: ${APP_JWT_SECRET:replace-with-long-secret-key-at-least-32-bytes-123456}
       expiration-seconds: 86400
   frontend:
-    base-url: http://localhost:5173
+    base-url: ${APP_FRONTEND_BASE_URL:http://localhost:5173}
 
 server:
-  port: 8080
+  port: ${PORT:8080}
