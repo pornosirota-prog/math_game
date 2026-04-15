@@ -29,9 +29,17 @@ npm run dev
 ```
 
 Для локальной разработки используйте `VITE_API_BASE_URL=http://localhost:8080` в `.env.local`.
-Для production укажите `VITE_API_BASE_URL=https://mathgame-production-70b3.up.railway.app`.
+Для production используйте `VITE_API_BASE_URL=https://mathgame-production-70b3.up.railway.app` (см. `frontend/.env.production`).
 
 Frontend поднимется на `http://localhost:5173`.
+
+
+## Переменные окружения URL
+- Frontend:
+  - `VITE_API_BASE_URL` — базовый URL backend API и OAuth login (`http://localhost:8080` локально, `https://mathgame-production-70b3.up.railway.app` в production).
+- Backend:
+  - `APP_FRONTEND_BASE_URL` — URL frontend для OAuth success redirect/CORS (`http://localhost:5173` локально, `https://math-game-8q8.pages.dev` в production).
+  - `APP_BACKEND_BASE_URL` — optional backend base URL (`http://localhost:8080` локально, `https://mathgame-production-70b3.up.railway.app` в production).
 
 ## H2 Console
 - URL: `http://localhost:8080/h2-console`
