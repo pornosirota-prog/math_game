@@ -102,13 +102,19 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
   const activeMode = modeRegistry.find((item) => item.id === modeId) ?? modeRegistry[0];
   const difficultyEngine = useMemo(() => new DifficultyEngine(activeMode.adaptiveSmoothing), [activeMode.adaptiveSmoothing]);
 
-  const spawnTask = (state: FlowState = flow, nextModeId: GameModeId = modeId) => {
-    const next = taskFactory.next(state, taskKindsForMode(nextModeId, progress.unlockedTaskKinds), nextModeId === 'equations' ? 'equation' : undefined);
+  const spawnTask = (state: FlowState = flow, nextModeId: GameModeId = modeId, answered = run.answered) => {
+    const next = taskFactory.next(
+      state,
+      taskKindsForMode(nextModeId, progress.unlockedTaskKinds),
+      nextModeId === 'equations' ? 'equation' : undefined,
+      { roundIndex: answered }
+    );
     setTask(next);
     setStartedAt(Date.now());
   };
 
   const startRun = (nextModeId: GameModeId, manualDifficultyScore = initialFlow.difficultyScore) => {
+    taskFactory.resetSession();
     const clampedDifficultyScore = Math.min(100, Math.max(0, manualDifficultyScore));
     setModeId(nextModeId);
     setRun(buildRunState(nextModeId));
@@ -194,6 +200,8 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
       expectedTimeMs: task.expectedTimeMs
     };
 
+    taskFactory.recordAttempt(attempt);
+
     const nextFlow = difficultyEngine.update(flow, attempt);
     const scored = scoreSystem.scoreAttempt(nextFlow, attempt, run.combo);
     const hasDoublePoints = isCorrect && run.doublePointsLeft > 0;
@@ -258,7 +266,7 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
         : `⚠️ ${task.answer}${shieldFeedback}`
     );
     soundManager.play(isCorrect ? 'reward' : 'click');
-    spawnTask(nextFlow, run.modeId);
+    spawnTask(nextFlow, run.modeId, nextRun.answered);
   };
 
   useEffect(() => {
