@@ -3,7 +3,7 @@ import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
 import { usePageMeta } from '../hooks/usePageMeta';
 
 export const DashboardPage = () => {
-  usePageMeta('Dashboard — Math Game', 'Центр игрока: уровень, лучший результат, daily challenge, режимы и визуальная статистика прогресса.');
+  usePageMeta('Dashboard — Math Game', 'Центр игрока: уровень, лучший результат, daily challenge, режимы и визуальная статистика прогресса.', { noindex: true });
 
   const { progress, stats, sessions, achievements, dailyChallenge } = useMathTrainer({ autoStart: false });
   const recent = sessions[0];

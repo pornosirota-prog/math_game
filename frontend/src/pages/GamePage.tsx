@@ -2,11 +2,14 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
 import { modeRegistry } from '../mathgame/systems/ModeRegistry';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const percent = (value: number) => `${Math.round(value * 100)}%`;
 const timerLabel = (remainingMs?: number) => (typeof remainingMs === 'number' ? `${Math.ceil(remainingMs / 1000)}с` : '∞');
 
 export const GamePage = () => {
+  usePageMeta('Игра — Math Game', 'Игровой раунд тренажёра устного счёта.', { noindex: true });
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const selectedMode = searchParams.get('mode');

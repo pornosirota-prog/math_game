@@ -225,7 +225,7 @@ export default function App() {
         <Route path="/faq" element={<InfoPage title="FAQ" body="Скоро здесь появятся ответы на частые вопросы пользователей." />} />
         <Route path="/privacy" element={<InfoPage title="Privacy Policy" body="Черновик политики конфиденциальности для будущего публичного запуска." />} />
         <Route path="/terms" element={<InfoPage title="Terms" body="Черновик пользовательского соглашения." />} />
-        <Route path="/support" element={<InfoPage title="Support" body="Свяжитесь с нами: support@mathgame.local" />} />
+        <Route path="/support" element={<InfoPage title="Support" body="Свяжитесь с нами: support@math-game.app" />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

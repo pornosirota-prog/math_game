@@ -15,7 +15,7 @@ interface ResultState {
 }
 
 export const ResultsPage = () => {
-  usePageMeta('Результаты — Math Game', 'Итоги раунда: счёт, точность, серия, скорость, опыт и графики прогресса.');
+  usePageMeta('Результаты — Math Game', 'Итоги раунда: счёт, точность, серия, скорость, опыт и графики прогресса.', { noindex: true });
 
   const location = useLocation();
   const state = (location.state as ResultState | null) ?? null;

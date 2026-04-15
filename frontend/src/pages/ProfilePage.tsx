@@ -5,7 +5,7 @@ import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
 import { usePageMeta } from '../hooks/usePageMeta';
 
 export const ProfilePage = () => {
-  usePageMeta('Профиль — Math Game', 'Профиль игрока: уровень, общий прогресс, любимый режим, статистика, достижения и история сессий.');
+  usePageMeta('Профиль — Math Game', 'Профиль игрока: уровень, общий прогресс, любимый режим, статистика, достижения и история сессий.', { noindex: true });
 
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const { progress, stats, sessions, achievements } = useMathTrainer({ autoStart: false });
