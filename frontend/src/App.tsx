@@ -13,8 +13,18 @@ import { useAuthStore } from './store/authStore';
 import { useSettingsStore } from './store/settingsStore';
 import { SiteFooter } from './components/footer/SiteFooter';
 import { InfoPage } from './pages/info/InfoPage';
+import { publicPages } from './pages/info/publicContent';
 
 const SIDEBAR_STORAGE_KEY = 'mathgame:sidebar-collapsed';
+
+const PUBLIC_NAV_LINKS = [
+  { to: '/about', label: 'О проекте' },
+  { to: '/how-to-play', label: 'Как играть' },
+  { to: '/modes', label: 'Режимы' },
+  { to: '/daily-challenge', label: 'Daily Challenge' },
+  { to: '/faq', label: 'FAQ' },
+  { to: '/contact', label: 'Контакты' }
+];
 
 type NavEntry = {
   to: string;
@@ -54,13 +64,16 @@ const PublicHeader = () => {
   if (token) return null;
 
   return (
-    <header className="layout app-topbar">
+    <header className="layout app-topbar public-topbar">
       <NavLink className="brand-link" to="/">
         <span className="brand-title">MATH GAME</span>
       </NavLink>
-      <div className="nav-links">
-        <NavLink to="/login">Войти</NavLink>
-      </div>
+      <nav className="nav-links public-nav-links" aria-label="Public navigation">
+        {PUBLIC_NAV_LINKS.map((link) => (
+          <NavLink key={link.to} to={link.to}>{link.label}</NavLink>
+        ))}
+        <NavLink className="public-login-link" to="/login">Войти</NavLink>
+      </nav>
     </header>
   );
 };
@@ -187,6 +200,17 @@ const AppShell = () => {
   );
 };
 
+const PublicFooter = () => {
+  const token = useAuthStore((state) => state.token);
+  const location = useLocation();
+
+  if (token || location.pathname.startsWith('/oauth-success')) {
+    return null;
+  }
+
+  return <SiteFooter />;
+};
+
 export default function App() {
   const themeId = useSettingsStore((state) => state.themeId);
   const token = useAuthStore((state) => state.token);
@@ -203,6 +227,20 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
 
+        <Route path="/about" element={<InfoPage content={publicPages.about} />} />
+        <Route path="/faq" element={<InfoPage content={publicPages.faq} />} />
+        <Route path="/how-to-play" element={<InfoPage content={publicPages['how-to-play']} />} />
+        <Route path="/daily-challenge" element={<InfoPage content={publicPages['daily-challenge']} />} />
+        <Route path="/privacy" element={<InfoPage content={publicPages.privacy} />} />
+        <Route path="/terms" element={<InfoPage content={publicPages.terms} />} />
+        <Route path="/contact" element={<InfoPage content={publicPages.contact} />} />
+        <Route path="/support" element={<Navigate to="/contact" replace />} />
+
+        <Route
+          path="/modes"
+          element={token ? <ModeSelectionPage /> : <InfoPage content={publicPages.modes} />}
+        />
+
         <Route
           path="/"
           element={(
@@ -212,24 +250,22 @@ export default function App() {
           )}
         >
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="modes" element={<ModeSelectionPage />} />
           <Route path="game" element={<GamePage />} />
           <Route path="results" element={<ResultsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="leaderboard" element={<LeaderboardPage />} />
-          <Route path="achievements" element={<InfoPage title="Achievements" body="Здесь будут детальные карточки достижений и прогресс по бейджам." />} />
+          <Route path="achievements" element={<InfoPage content={{
+            title: 'Achievements',
+            description: 'Прогресс по достижениям и бейджам игрока в Math Game.',
+            lead: 'Здесь отображаются ваши игровые достижения и этапы прогресса.',
+            sections: [{ title: 'Раздел в развитии', paragraphs: ['Скоро здесь появятся детальные карточки достижений, условия разблокировки и аналитика по прогрессу.'] }]
+          }} />} />
         </Route>
-
-        <Route path="/about" element={<InfoPage title="About" body="Math Game помогает развивать скорость счёта через игровые раунды." />} />
-        <Route path="/faq" element={<InfoPage title="FAQ" body="Скоро здесь появятся ответы на частые вопросы пользователей." />} />
-        <Route path="/privacy" element={<InfoPage title="Privacy Policy" body="Черновик политики конфиденциальности для будущего публичного запуска." />} />
-        <Route path="/terms" element={<InfoPage title="Terms" body="Черновик пользовательского соглашения." />} />
-        <Route path="/support" element={<InfoPage title="Support" body="Свяжитесь с нами: support@math-game.app" />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <SiteFooter />
+      <PublicFooter />
     </>
   );
 }

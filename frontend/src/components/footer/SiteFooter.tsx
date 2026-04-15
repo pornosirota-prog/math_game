@@ -4,14 +4,17 @@ export const SiteFooter = () => (
   <footer className="site-footer layout">
     <div>
       <strong>Math Game</strong>
-      <p>Тренируй скорость счёта и прогрессируй каждый день.</p>
+      <p>Тренируй скорость счёта, улучшай точность и отслеживай прогресс каждый день.</p>
     </div>
-    <nav className="footer-links">
+    <nav className="footer-links" aria-label="Footer navigation">
       <NavLink to="/about">About</NavLink>
       <NavLink to="/faq">FAQ</NavLink>
-      <NavLink to="/privacy">Privacy Policy</NavLink>
+      <NavLink to="/how-to-play">How to Play</NavLink>
+      <NavLink to="/modes">Modes</NavLink>
+      <NavLink to="/daily-challenge">Daily Challenge</NavLink>
+      <NavLink to="/privacy">Privacy</NavLink>
       <NavLink to="/terms">Terms</NavLink>
-      <NavLink to="/support">Contact / Support</NavLink>
+      <NavLink to="/contact">Contact</NavLink>
     </nav>
   </footer>
 );
