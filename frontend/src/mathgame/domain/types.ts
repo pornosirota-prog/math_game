@@ -1,7 +1,7 @@
 export type Operation = '+' | '-' | '*' | '/';
 
 export type TaskKind = 'arithmetic' | 'equation';
-export type TaskModifier = 'normal' | 'golden' | 'blitz' | 'shield' | 'double3';
+export type TaskModifier = 'normal' | 'golden' | 'blitz' | 'shield' | 'double3' | 'recovery' | 'boss';
 
 export type TemplateId =
   | 'tier1_two_single_add'
