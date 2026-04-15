@@ -34,7 +34,7 @@ const PublicHeader = () => {
   return (
     <header className="layout app-topbar">
       <NavLink className="brand-link" to={token ? '/dashboard' : '/'}>
-        <span className="brand-title">MATH TRAINER</span>
+        <span className="brand-title">MATH GAME</span>
       </NavLink>
       <div className="nav-links">
         {!token && <NavLink to="/login">Войти</NavLink>}
@@ -55,7 +55,7 @@ const AppShell = () => {
           <NavLink to="/dashboard">☰</NavLink>
           <NavLink to="/modes">Режимы</NavLink>
         </nav>
-        <strong className="trainer-toolbar-title">MATH TRAINER</strong>
+        <strong className="trainer-toolbar-title">MATH GAME</strong>
         <details className="profile-dropdown">
           <summary>☰</summary>
           <div className="dropdown-menu">
