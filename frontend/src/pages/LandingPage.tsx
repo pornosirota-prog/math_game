@@ -20,7 +20,7 @@ export const LandingPage = () => {
           Быстрые математические раунды, прогрессия, достижения и ежедневные челленджи в одном веб‑продукте.
         </p>
         <div className="row">
-          <Link className="cta-link" to="/register">Играть бесплатно</Link>
+          <Link className="cta-link" to="/login">Играть бесплатно</Link>
           <Link className="cta-link secondary" to="/login">Войти</Link>
         </div>
       </section>

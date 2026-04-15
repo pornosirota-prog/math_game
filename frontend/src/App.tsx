@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
 import { GamePage } from './pages/GamePage';
 import { ProfilePage } from './pages/ProfilePage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -61,7 +60,6 @@ const PublicHeader = () => {
       </NavLink>
       <div className="nav-links">
         <NavLink to="/login">Войти</NavLink>
-        <NavLink to="/register">Регистрация</NavLink>
       </div>
     </header>
   );
@@ -203,7 +201,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={token ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
 
         <Route

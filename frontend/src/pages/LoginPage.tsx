@@ -1,10 +1,5 @@
-import { FormEvent, useState } from 'react';
-import { gameApi } from '../api/gameApi';
-import { useAuthStore } from '../store/authStore';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { GOOGLE_OAUTH_URL } from '../config/api';
-
-const LOCAL_PLAYER_NAME_KEY = 'mathflow.playerName';
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false" className="google-icon">
@@ -15,41 +10,18 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export const LoginPage = () => {
-  const navigate = useNavigate();
-  const setToken = useAuthStore((s) => s.setToken);
-  const [email, setEmail] = useState('demo@game.local');
-  const [password, setPassword] = useState('demo123');
+export const LoginPage = () => (
+  <div className="layout card auth-card">
+    <h2>Вход</h2>
+    <p>Авторизация доступна только через Google.</p>
 
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    const response = await gameApi.login(email, password);
-    setToken(response.data.token);
-    const fallbackName = email.split('@')[0] || 'Player';
-    localStorage.setItem(LOCAL_PLAYER_NAME_KEY, fallbackName);
-    navigate('/dashboard');
-  };
+    <a className="google-auth-button" href={GOOGLE_OAUTH_URL}>
+      <GoogleIcon />
+      <span>Продолжить через Google</span>
+    </a>
 
-  return (
-    <div className="layout card auth-card">
-      <h2>Вход</h2>
-      <form onSubmit={submit} className="row">
-        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-        <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
-        <button type="submit">Войти</button>
-      </form>
-
-      <div className="auth-separator"><span>или</span></div>
-
-      <a className="google-auth-button" href={GOOGLE_OAUTH_URL}>
-        <GoogleIcon />
-        <span>Продолжить через Google</span>
-      </a>
-
-      <div className="auth-links">
-        <Link to="/register" className="auth-link-button secondary">Нет аккаунта? Регистрация</Link>
-        <Link to="/" className="auth-link-button ghost">← На главную</Link>
-      </div>
+    <div className="auth-links">
+      <Link to="/" className="auth-link-button ghost">← На главную</Link>
     </div>
-  );
-};
+  </div>
+);
