@@ -18,30 +18,32 @@ export const ProfilePage = () => {
 
   return (
     <div className="layout">
-      <section className="card">
+      <section className="card profile-main-card">
         <h1>Профиль</h1>
-        <p>Имя: {profile?.displayName ?? 'Player'}</p>
-        <p>Email: {profile?.email ?? 'offline@local'}</p>
-        <p>Уровень: {progress.level}</p>
-        <p>Общий прогресс XP: {progress.xp}</p>
-        <p>Любимый режим: {favoriteMode}</p>
+        <div className="profile-meta-grid">
+          <p>Имя: {profile?.displayName ?? 'Player'}</p>
+          <p>Email: {profile?.email ?? 'offline@local'}</p>
+          <p>Уровень: {progress.level}</p>
+          <p>Общий прогресс XP: {progress.xp}</p>
+          <p>Любимый режим: {favoriteMode}</p>
+        </div>
       </section>
 
-      <section className="card quick-grid">
-        <article>
+      <section className="card quick-grid profile-sections">
+        <article className="profile-section">
           <h3>Общая статистика</h3>
           <p>Игр: {stats.totalGames}</p>
           <p>Лучший счёт: {stats.bestScore}</p>
           <p>Средняя точность: {Math.round(stats.averageAccuracy * 100)}%</p>
         </article>
-        <article>
+        <article className="profile-section">
           <h3>Достижения</h3>
           <p>Открыто: {achievements.filter((a) => a.unlocked).length}/{achievements.length}</p>
           <ul>
             {achievements.slice(0, 4).map((item) => <li key={item.id}>{item.title}: {item.unlocked ? '✅' : '🔒'}</li>)}
           </ul>
         </article>
-        <article>
+        <article className="profile-section">
           <h3>История игр</h3>
           <ul>
             {sessions.slice(0, 4).map((s) => (
