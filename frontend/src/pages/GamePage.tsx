@@ -40,7 +40,12 @@ export const GamePage = () => {
     [selectedMode]
   );
 
-  if (!selectedMode || !modeIsValid) return <Navigate to="/modes" replace />;
+  const selectedModeMeta = useMemo(
+    () => modeRegistry.find((mode) => mode.id === selectedMode),
+    [selectedMode]
+  );
+
+  if (!selectedMode || !modeIsValid || !selectedModeMeta) return <Navigate to="/modes" replace />;
 
   const beginRound = () => {
     startRun(selectedMode as typeof modeId);
@@ -70,7 +75,7 @@ export const GamePage = () => {
       accuracy: run.answered === 0 ? 0 : Math.round((run.correct / run.answered) * 100),
       bestCombo: run.bestCombo,
       answered: run.answered,
-      mode: activeMode.title,
+      mode: selectedModeMeta.title,
       durationMs: Date.now() - run.startedAt,
       avgAnswerMs: run.answered > 0 ? Math.round((Date.now() - run.startedAt) / run.answered) : 0,
       correct: run.correct,
@@ -81,7 +86,7 @@ export const GamePage = () => {
   return (
     <div className="layout math-layout trainer-game">
       <section className="card game-hud-grid">
-        <div><span>Режим</span><strong>{activeMode.title}</strong></div>
+        <div><span>Режим</span><strong>{isRoundStarted ? activeMode.title : selectedModeMeta.title}</strong></div>
         <div><span>Очки</span><strong>{run.score}</strong></div>
         <div><span>Комбо</span><strong>x{run.combo}</strong></div>
         <div><span>Таймер</span><strong>{timerLabel(run.remainingMs)}</strong></div>
@@ -91,8 +96,8 @@ export const GamePage = () => {
 
       {!isRoundStarted && (
         <section className="card game-start-card">
-          <h2>{activeMode.title}</h2>
-          <p>{activeMode.description}</p>
+          <h2>{selectedModeMeta.title}</h2>
+          <p>{selectedModeMeta.description}</p>
           <div className="row">
             <button type="button" onClick={beginRound}>Start / Play</button>
             <button type="button" onClick={() => navigate('/modes')}>Выбрать другой режим</button>

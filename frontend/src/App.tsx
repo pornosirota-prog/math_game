@@ -9,6 +9,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { ModeSelectionPage } from './pages/ModeSelectionPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ResultsPage } from './pages/ResultsPage';
+import { LeaderboardPage } from './pages/LeaderboardPage';
 import { useAuthStore } from './store/authStore';
 import { useSettingsStore } from './store/settingsStore';
 import { SiteFooter } from './components/footer/SiteFooter';
@@ -81,12 +82,12 @@ const AppShell = () => {
 };
 
 export default function App() {
-  const darkThemeEnabled = useSettingsStore((state) => state.darkThemeEnabled);
+  const themeId = useSettingsStore((state) => state.themeId);
   const token = useAuthStore((state) => state.token);
 
   useEffect(() => {
-    document.body.classList.toggle('light-theme', !darkThemeEnabled);
-  }, [darkThemeEnabled]);
+    document.body.dataset.theme = themeId;
+  }, [themeId]);
 
   return (
     <>
@@ -111,7 +112,7 @@ export default function App() {
           <Route path="results" element={<ResultsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
-          <Route path="leaderboard" element={<InfoPage title="Leaderboard" body="Раздел рейтинга готов для подключения серверной таблицы лидеров." />} />
+          <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="achievements" element={<InfoPage title="Achievements" body="Здесь будут детальные карточки достижений и прогресс по бейджам." />} />
         </Route>
 

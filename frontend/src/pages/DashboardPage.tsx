@@ -3,12 +3,14 @@ import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
 import { usePageMeta } from '../hooks/usePageMeta';
 
 export const DashboardPage = () => {
-  usePageMeta('Dashboard — Math Game', 'Центр игрока: уровень, лучший результат, daily challenge, режимы и краткая статистика.');
+  usePageMeta('Dashboard — Math Game', 'Центр игрока: уровень, лучший результат, daily challenge, режимы и визуальная статистика прогресса.');
 
   const { progress, stats, sessions, achievements, dailyChallenge } = useMathTrainer({ autoStart: false });
   const recent = sessions[0];
   const unlockedAchievements = achievements.filter((item) => item.unlocked).length;
   const xpProgress = progress.xp % 1000;
+  const recentSessions = sessions.slice(0, 8).reverse();
+  const peakScore = Math.max(1, ...recentSessions.map((item) => item.score));
 
   return (
     <div className="layout trainer-dashboard">
@@ -63,6 +65,45 @@ export const DashboardPage = () => {
           <p>Среднее время ответа: <strong>{Math.round(stats.averageAnswerMs)} мс</strong></p>
           <p>Лучший стрик: <strong>x{stats.bestStreak}</strong></p>
         </div>
+      </section>
+
+      <section className="quick-grid">
+        <article className="card">
+          <h3>График очков (последние игры)</h3>
+          {recentSessions.length === 0 ? (
+            <p>Сыграй несколько матчей, чтобы увидеть динамику очков.</p>
+          ) : (
+            <div className="score-sparkline" aria-label="График очков">
+              {recentSessions.map((session) => (
+                <div
+                  className="spark-bar"
+                  key={session.id}
+                  title={`${session.score} очков • ${Math.round(session.accuracy * 100)}%`}
+                  style={{ height: `${Math.max(8, (session.score / peakScore) * 120)}px` }}
+                />
+              ))}
+            </div>
+          )}
+        </article>
+
+        <article className="card">
+          <h3>Точность (последние игры)</h3>
+          {recentSessions.length === 0 ? (
+            <p>Тут появится визуализация точности после игр.</p>
+          ) : (
+            <div className="accuracy-list">
+              {recentSessions.map((session) => (
+                <div className="accuracy-row" key={`${session.id}-accuracy`}>
+                  <span>{new Date(session.playedAt).toLocaleDateString()}</span>
+                  <strong>{Math.round(session.accuracy * 100)}%</strong>
+                  <div className="xp-track">
+                    <div style={{ width: `${Math.round(session.accuracy * 100)}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </article>
       </section>
     </div>
   );
