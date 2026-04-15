@@ -36,6 +36,19 @@ export const modeRegistry: GameMode[] = [
     adaptiveSmoothing: 0.12
   },
   {
+    id: 'allmix',
+    title: 'All Operations',
+    description: 'Random mix of +, -, × and ÷ in one run.',
+    initialDurationMs: 90_000,
+    adaptiveSmoothing: 0.2
+  },
+  {
+    id: 'custom',
+    title: 'Custom',
+    description: 'Configure operations and duration for your own mode.',
+    adaptiveSmoothing: 0.15
+  },
+  {
     id: 'equations',
     title: 'Equations',
     description: 'Solve linear equations in adaptive flow.',

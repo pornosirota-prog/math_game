@@ -6,10 +6,12 @@ import { usePageMeta } from '../hooks/usePageMeta';
 const modes: Array<{ id: GameModeId; title: string; description: string; difficulty: string; locked?: boolean }> = [
   { id: 'classic', title: 'Classic', description: 'Сбалансированный режим для ежедневной тренировки.', difficulty: 'Низкая' },
   { id: 'sprint60', title: 'Sprint 60', description: 'Максимум очков за 60 секунд.', difficulty: 'Средняя' },
+  { id: 'allmix', title: 'All Operations', description: 'Все операции вперемешку: +, -, ×, ÷.', difficulty: 'Средняя' },
+  { id: 'custom', title: 'Custom', description: 'Соберите собственный режим: операции и таймер.', difficulty: 'Любая' },
   { id: 'streak', title: 'No-Miss Streak', description: 'Ошибка завершает раунд.', difficulty: 'Высокая' },
   { id: 'twenty', title: '20 Tasks', description: '20 задач на скорость и точность.', difficulty: 'Средняя' },
   { id: 'infinite', title: 'Infinite', description: 'Бесконечный режим для обучения.', difficulty: 'Низкая' },
-  { id: 'equations', title: 'Equations', description: 'Алгебраические задания (planned).', difficulty: 'Высокая', locked: true }
+  { id: 'equations', title: 'Equations', description: 'Алгебраические задания.', difficulty: 'Высокая' }
 ];
 
 export const ModeSelectionPage = () => {

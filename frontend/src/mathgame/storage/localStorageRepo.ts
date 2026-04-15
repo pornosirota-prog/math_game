@@ -278,7 +278,7 @@ export const loadDailyChallenge = (): DailyChallengeState => {
     const parsed = JSON.parse(raw) as DailyChallengeState;
     if (parsed.challengeDate === today) return parsed;
 
-    const seededModeOrder: GameModeId[] = ['classic', 'sprint60', 'twenty', 'streak', 'infinite'];
+    const seededModeOrder: GameModeId[] = ['classic', 'sprint60', 'allmix', 'twenty', 'streak', 'infinite', 'custom'];
     const day = Number.parseInt(today.split('-')[2] ?? '1', 10);
     const modeId = seededModeOrder[day % seededModeOrder.length];
     const nextChallenge: DailyChallengeState = {

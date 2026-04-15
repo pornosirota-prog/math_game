@@ -1,11 +1,46 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
+import type { Operation } from '../mathgame/domain/types';
 import { modeRegistry } from '../mathgame/systems/ModeRegistry';
 import { usePageMeta } from '../hooks/usePageMeta';
 
 const percent = (value: number) => `${Math.round(value * 100)}%`;
 const timerLabel = (remainingMs?: number) => (typeof remainingMs === 'number' ? `${Math.ceil(remainingMs / 1000)}с` : '∞');
+const OPERATION_LABELS: Record<Operation, string> = {
+  '+': 'Сложение (+)',
+  '-': 'Вычитание (-)',
+  '*': 'Умножение (×)',
+  '/': 'Деление (÷)'
+};
+const CUSTOM_SETTINGS_KEY = 'mathflow.customMode.v1';
+
+interface CustomModeSettings {
+  durationSeconds: number;
+  operations: Operation[];
+}
+
+const readCustomSettings = (): CustomModeSettings => {
+  const fallback: CustomModeSettings = { durationSeconds: 90, operations: ['+', '-', '*', '/'] };
+  try {
+    const raw = localStorage.getItem(CUSTOM_SETTINGS_KEY);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as Partial<CustomModeSettings>;
+    const operations = (parsed.operations ?? fallback.operations).filter((item): item is Operation =>
+      ['+', '-', '*', '/'].includes(item)
+    );
+    return {
+      durationSeconds: Math.min(300, Math.max(30, Math.round(parsed.durationSeconds ?? fallback.durationSeconds))),
+      operations: operations.length > 0 ? operations : ['+']
+    };
+  } catch {
+    return fallback;
+  }
+};
+
+const saveCustomSettings = (settings: CustomModeSettings) => {
+  localStorage.setItem(CUSTOM_SETTINGS_KEY, JSON.stringify(settings));
+};
 
 export const GamePage = () => {
   usePageMeta('Игра — Math Game', 'Игровой раунд тренажёра устного счёта.', { noindex: true });
@@ -28,6 +63,7 @@ export const GamePage = () => {
   const [input, setInput] = useState('');
   const [isPaused, setIsPaused] = useState(false);
   const [isRoundStarted, setIsRoundStarted] = useState(false);
+  const [customSettings, setCustomSettings] = useState<CustomModeSettings>(() => readCustomSettings());
 
   useEffect(() => {
     if (!selectedMode || !modeRegistry.some((mode) => mode.id === selectedMode)) {
@@ -51,8 +87,26 @@ export const GamePage = () => {
   if (!selectedMode || !modeIsValid || !selectedModeMeta) return <Navigate to="/modes" replace />;
 
   const beginRound = () => {
-    startRun(selectedMode as typeof modeId);
+    const runConfig =
+      selectedMode === 'custom'
+        ? { durationMs: customSettings.durationSeconds * 1000, preferredOperations: customSettings.operations }
+        : undefined;
+    startRun(selectedMode as typeof modeId, undefined, runConfig);
     setIsRoundStarted(true);
+  };
+
+  const updateCustomSettings = (next: CustomModeSettings) => {
+    setCustomSettings(next);
+    saveCustomSettings(next);
+  };
+
+  const toggleOperation = (operation: Operation) => {
+    const hasOperation = customSettings.operations.includes(operation);
+    const nextOperations = hasOperation
+      ? customSettings.operations.filter((item) => item !== operation)
+      : [...customSettings.operations, operation];
+    if (nextOperations.length === 0) return;
+    updateCustomSettings({ ...customSettings, operations: nextOperations });
   };
 
   const onSubmit = (event: FormEvent) => {
@@ -104,6 +158,36 @@ export const GamePage = () => {
         <section className="card game-start-card">
           <h2>{selectedModeMeta.title}</h2>
           <p>{selectedModeMeta.description}</p>
+          {selectedMode === 'custom' && (
+            <section className="card" style={{ marginBottom: 12 }}>
+              <h3>Настройка Custom режима</h3>
+              <label htmlFor="custom-duration">Длительность: {customSettings.durationSeconds} сек</label>
+              <input
+                id="custom-duration"
+                type="range"
+                min={30}
+                max={300}
+                step={10}
+                value={customSettings.durationSeconds}
+                onChange={(event) => updateCustomSettings({
+                  ...customSettings,
+                  durationSeconds: Number(event.target.value)
+                })}
+              />
+              <div className="quick-grid">
+                {(Object.keys(OPERATION_LABELS) as Operation[]).map((operation) => (
+                  <label key={operation}>
+                    <input
+                      type="checkbox"
+                      checked={customSettings.operations.includes(operation)}
+                      onChange={() => toggleOperation(operation)}
+                    />
+                    {OPERATION_LABELS[operation]}
+                  </label>
+                ))}
+              </div>
+            </section>
+          )}
           <div className="row">
             <button type="button" onClick={beginRound}>Start / Play</button>
             <button type="button" onClick={() => navigate('/modes')}>Выбрать другой режим</button>

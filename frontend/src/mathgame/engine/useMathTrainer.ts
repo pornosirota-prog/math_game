@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { FlowState, GameModeId, GeneratedTask, LeaderboardRecord, RunState, TaskAttempt, TaskKind } from '../domain/types';
+import type { FlowState, GameModeId, GeneratedTask, LeaderboardRecord, Operation, RunState, TaskAttempt, TaskKind } from '../domain/types';
 import { modeRegistry, defaultModeId } from '../systems/ModeRegistry';
 import { TaskFactory } from '../generators/TaskFactory';
 import { DifficultyEngine } from '../systems/DifficultyEngine';
@@ -47,6 +47,23 @@ const resolvePlayerName = () => localStorage.getItem(scopedStorageKey(LOCAL_PLAY
 const taskKindsForMode = (currentModeId: GameModeId, unlockedTaskKinds: TaskKind[]): TaskKind[] =>
   currentModeId === 'equations' ? ['equation'] : unlockedTaskKinds;
 
+interface RunConfig {
+  preferredOperations?: Operation[];
+  durationMs?: number;
+}
+
+const allArithmeticOperations: Operation[] = ['+', '-', '*', '/'];
+
+const resolveOperationsForMode = (currentModeId: GameModeId, config?: RunConfig): Operation[] | undefined => {
+  if (currentModeId === 'equations') return undefined;
+  if (currentModeId === 'allmix') return allArithmeticOperations;
+  if (currentModeId === 'custom') {
+    const deduped = (config?.preferredOperations ?? []).filter((operation, index, arr) => arr.indexOf(operation) === index);
+    return deduped.length > 0 ? deduped : ['+'];
+  }
+  return undefined;
+};
+
 const notifyRunFinished = (score: number, accuracy: number) => {
   const { notificationsEnabled } = useSettingsStore.getState();
   if (!notificationsEnabled || typeof window === 'undefined' || !('Notification' in window)) return;
@@ -64,9 +81,10 @@ const notifyRunFinished = (score: number, accuracy: number) => {
   }
 };
 
-const buildRunState = (modeId: GameModeId): RunState => {
+const buildRunState = (modeId: GameModeId, config?: RunConfig): RunState => {
   const mode = modeRegistry.find((item) => item.id === modeId);
   const now = Date.now();
+  const durationMs = config?.durationMs ?? mode?.initialDurationMs;
   return {
     modeId,
     score: 0,
@@ -77,8 +95,8 @@ const buildRunState = (modeId: GameModeId): RunState => {
     answered: 0,
     bestCombo: 0,
     startedAt: now,
-    endsAt: mode?.initialDurationMs ? now + mode.initialDurationMs : undefined,
-    remainingMs: mode?.initialDurationMs,
+    endsAt: durationMs ? now + durationMs : undefined,
+    remainingMs: durationMs,
     shieldCharges: 0,
     doublePointsLeft: 0
   };
@@ -96,6 +114,7 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
   const [flow, setFlow] = useState<FlowState>(initialFlow);
   const [task, setTask] = useState<GeneratedTask | null>(null);
   const [startedAt, setStartedAt] = useState(Date.now());
+  const [runConfig, setRunConfig] = useState<RunConfig>({});
   const [lastFeedback, setLastFeedback] = useState<string>('Ready');
   const [isFinished, setIsFinished] = useState(false);
   const [attemptHistory, setAttemptHistory] = useState<AttemptSnapshot[]>([]);
@@ -107,22 +126,23 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
   const activeMode = modeRegistry.find((item) => item.id === modeId) ?? modeRegistry[0];
   const difficultyEngine = useMemo(() => new DifficultyEngine(activeMode.adaptiveSmoothing), [activeMode.adaptiveSmoothing]);
 
-  const spawnTask = (state: FlowState = flow, nextModeId: GameModeId = modeId, answered = run.answered) => {
+  const spawnTask = (state: FlowState = flow, nextModeId: GameModeId = modeId, answered = run.answered, config: RunConfig = runConfig) => {
     const next = taskFactory.next(
       state,
       taskKindsForMode(nextModeId, progress.unlockedTaskKinds),
       nextModeId === 'equations' ? 'equation' : undefined,
-      { roundIndex: answered }
+      { roundIndex: answered, preferredOperations: resolveOperationsForMode(nextModeId, config) }
     );
     setTask(next);
     setStartedAt(Date.now());
   };
 
-  const startRun = (nextModeId: GameModeId, manualDifficultyScore = initialFlow.difficultyScore) => {
+  const startRun = (nextModeId: GameModeId, manualDifficultyScore = initialFlow.difficultyScore, config: RunConfig = {}) => {
     taskFactory.resetSession();
     const clampedDifficultyScore = Math.min(100, Math.max(0, manualDifficultyScore));
     setModeId(nextModeId);
-    setRun(buildRunState(nextModeId));
+    setRunConfig(config);
+    setRun(buildRunState(nextModeId, config));
     const seededFlow: FlowState = {
       ...initialFlow,
       difficultyScore: clampedDifficultyScore,
@@ -137,6 +157,8 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
       seededFlow,
       taskKindsForMode(nextModeId, progress.unlockedTaskKinds),
       nextModeId === 'equations' ? 'equation' : undefined
+      ,
+      { roundIndex: 0, preferredOperations: resolveOperationsForMode(nextModeId, config) }
     );
     setTask(nextTask);
     setStartedAt(Date.now());
@@ -275,7 +297,7 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
         : `⚠️ ${task.answer}${shieldFeedback}`
     );
     soundManager.play(isCorrect ? 'reward' : 'click');
-    spawnTask(nextFlow, run.modeId, nextRun.answered);
+    spawnTask(nextFlow, run.modeId, nextRun.answered, runConfig);
   };
 
   useEffect(() => {
@@ -316,6 +338,7 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
     achievements,
     dailyChallenge,
     startRun,
-    submitAnswer
+    submitAnswer,
+    runConfig
   };
 };
