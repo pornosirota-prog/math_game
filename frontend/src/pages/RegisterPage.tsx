@@ -2,8 +2,8 @@ import { FormEvent, useState } from 'react';
 import { gameApi } from '../api/gameApi';
 import { useAuthStore } from '../store/authStore';
 import { Link, useNavigate } from 'react-router-dom';
+import { GOOGLE_OAUTH_URL } from '../config/api';
 
-const GOOGLE_AUTH_URL = 'http://localhost:8080/oauth2/authorization/google';
 const LOCAL_PLAYER_NAME_KEY = 'mathflow.playerName';
 
 const GoogleIcon = () => (
@@ -43,7 +43,7 @@ export const RegisterPage = () => {
 
       <div className="auth-separator"><span>или</span></div>
 
-      <a className="google-auth-button" href={GOOGLE_AUTH_URL}>
+      <a className="google-auth-button" href={GOOGLE_OAUTH_URL}>
         <GoogleIcon />
         <span>Зарегистрироваться через Google</span>
       </a>

@@ -22,10 +22,14 @@ Backend поднимется на `http://localhost:8080`.
 postgresql://neondb_owner:npg_Vx3hieE0FZkK@ep-lingering-surf-albswyft.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ## Запуск frontend
 ```bash
-cd I:\math_game\frontend
+cd frontend
+cp .env.example .env.local
 npm install
 npm run dev
 ```
+
+Для локальной разработки используйте `VITE_API_BASE_URL=http://localhost:8080` в `.env.local`.
+Для production укажите `VITE_API_BASE_URL=https://mathgame-production-70b3.up.railway.app`.
 
 Frontend поднимется на `http://localhost:5173`.
 
