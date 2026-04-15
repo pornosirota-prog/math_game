@@ -6,14 +6,23 @@ export type TaskModifier = 'normal' | 'golden' | 'blitz' | 'shield' | 'double3' 
 export type TemplateId =
   | 'tier1_two_single_add'
   | 'tier2_single_plus_double'
+  | 'tier2_two_single_sub'
   | 'tier3_two_double_no_carry'
+  | 'tier3_single_digit_mul'
   | 'tier4_two_double_with_carry'
+  | 'tier4_two_double_sub'
   | 'tier5_two_triple_light'
+  | 'tier5_simple_division'
   | 'tier6_two_triple_carry'
+  | 'tier6_double_single_mul'
   | 'tier7_three_double_add'
+  | 'tier7_mixed_add_sub'
   | 'tier8_two_double_one_triple'
+  | 'tier8_double_digit_mul'
   | 'tier9_three_triple_add'
+  | 'tier9_division_chain'
   | 'tier10_mixed_ops'
+  | 'tier10_all_ops'
   | 'eq_tier3_linear_add'
   | 'eq_tier6_linear_sub'
   | 'eq_tier9_linear_mix';
@@ -62,7 +71,7 @@ export interface TaskAttempt {
   expectedTimeMs: number;
 }
 
-export type GameModeId = 'classic' | 'infinite' | 'streak' | 'sprint60' | 'twenty' | 'equations';
+export type GameModeId = 'classic' | 'infinite' | 'streak' | 'sprint60' | 'twenty' | 'equations' | 'allmix' | 'custom';
 
 export interface GameMode {
   id: GameModeId;

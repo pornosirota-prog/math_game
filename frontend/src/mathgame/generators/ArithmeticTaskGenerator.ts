@@ -70,6 +70,15 @@ export class ArithmeticTaskGenerator {
         if (op === '-' && !template.allowNegativeResult && value - right < 0) {
           numbers[i + 1] = rndInt(1, Math.max(1, value));
         }
+        if (op === '/' && numbers[i + 1] !== 0) {
+          const limitedDivisor = Math.max(1, Math.abs(numbers[i + 1]));
+          const safeBase = Math.max(1, Math.abs(Math.round(value)));
+          const divisors: number[] = [];
+          for (let candidate = 1; candidate <= Math.min(limitedDivisor, safeBase); candidate += 1) {
+            if (safeBase % candidate === 0) divisors.push(candidate);
+          }
+          numbers[i + 1] = divisors.length > 0 ? choose(divisors) : 1;
+        }
         expression = `${expression} ${op} ${numbers[i + 1]}`;
         value = apply(value, numbers[i + 1], op);
       }

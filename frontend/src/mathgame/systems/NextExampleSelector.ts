@@ -1,5 +1,5 @@
 import { templates, tierByDifficultyScore } from '../config/adaptiveTemplates';
-import type { DifficultyTemplate, FlowState, TaskAttempt, TaskKind, TemplateId } from '../domain/types';
+import type { DifficultyTemplate, FlowState, Operation, TaskAttempt, TaskKind, TemplateId } from '../domain/types';
 
 export type SessionWave = 'warmup' | 'speed' | 'challenge' | 'recovery';
 export type ExampleCategory =
@@ -15,6 +15,7 @@ export type ExampleCategory =
 
 export interface SelectionContext {
   roundIndex: number;
+  preferredOperations?: Operation[];
 }
 
 interface ExampleHistoryEntry {
@@ -84,8 +85,13 @@ export class NextExampleSelector {
     const shiftedTier = clamp(tierByWave + weightedTierShift(), 1, 10);
     const allowedKinds = forcedTaskKind ? [forcedTaskKind] : unlockedTaskKinds;
 
+    const allowedOperations = context?.preferredOperations;
     const candidates = templates
       .filter((template) => allowedKinds.includes(template.taskKind))
+      .filter((template) => {
+        if (!allowedOperations || template.taskKind !== 'arithmetic') return true;
+        return template.operations.some((operation) => allowedOperations.includes(operation));
+      })
       .filter((template) => Math.abs(template.tier - shiftedTier) <= 2)
       .map((template) => this.scoreTemplateCandidate(template, flow, shiftedTier, wave));
 
