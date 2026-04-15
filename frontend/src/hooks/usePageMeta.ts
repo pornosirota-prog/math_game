@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://math-game-8q8.pages.dev').replace(/\/+$/, '');
+const DEFAULT_OG_IMAGE = new URL('/og-image.svg', SITE_URL).toString();
 
 type PageMetaOptions = {
   noindex?: boolean;
@@ -52,5 +53,12 @@ export const usePageMeta = (title: string, description: string, options: PageMet
     upsertPropertyTag('og:type', 'website');
     upsertPropertyTag('og:url', canonicalUrl);
     upsertPropertyTag('og:site_name', 'Math Game');
+    upsertPropertyTag('og:locale', 'ru_RU');
+    upsertPropertyTag('og:image', DEFAULT_OG_IMAGE);
+
+    upsertMetaTag('twitter:card', 'summary_large_image');
+    upsertMetaTag('twitter:title', title);
+    upsertMetaTag('twitter:description', description);
+    upsertMetaTag('twitter:image', DEFAULT_OG_IMAGE);
   }, [canonicalUrl, description, robots, title]);
 };

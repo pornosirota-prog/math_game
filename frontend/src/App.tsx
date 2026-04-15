@@ -13,6 +13,7 @@ import { useAuthStore } from './store/authStore';
 import { useSettingsStore } from './store/settingsStore';
 import { SiteFooter } from './components/footer/SiteFooter';
 import { InfoPage } from './pages/info/InfoPage';
+import { PublicContentPage } from './pages/public/PublicContentPage';
 
 const SIDEBAR_STORAGE_KEY = 'mathgame:sidebar-collapsed';
 
@@ -30,6 +31,15 @@ const NAV_ITEMS: NavEntry[] = [
   { to: '/achievements', label: 'Достижения', icon: '⭐' },
   { to: '/profile', label: 'Профиль', icon: '👤' },
   { to: '/settings', label: 'Настройки', icon: '⚙️' }
+];
+
+const PUBLIC_NAV_ITEMS = [
+  { to: '/about', label: 'О проекте' },
+  { to: '/how-to-play', label: 'Как играть' },
+  { to: '/modes', label: 'Режимы' },
+  { to: '/daily-challenge', label: 'Daily Challenge' },
+  { to: '/faq', label: 'FAQ' },
+  { to: '/contact', label: 'Контакты' }
 ];
 
 const RequireAuth = ({ children }: { children: JSX.Element }) => {
@@ -58,9 +68,12 @@ const PublicHeader = () => {
       <NavLink className="brand-link" to="/">
         <span className="brand-title">MATH GAME</span>
       </NavLink>
-      <div className="nav-links">
+      <nav className="nav-links" aria-label="Публичная навигация">
+        {PUBLIC_NAV_ITEMS.map((item) => (
+          <NavLink key={item.to} to={item.to}>{item.label}</NavLink>
+        ))}
         <NavLink to="/login">Войти</NavLink>
-      </div>
+      </nav>
     </header>
   );
 };
@@ -187,6 +200,18 @@ const AppShell = () => {
   );
 };
 
+const ModesRoute = () => {
+  const token = useAuthStore((state) => state.token);
+  if (token) {
+    return (
+      <RequireAuth>
+        <ModeSelectionPage />
+      </RequireAuth>
+    );
+  }
+  return <PublicContentPage pageKey="modes" />;
+};
+
 export default function App() {
   const themeId = useSettingsStore((state) => state.themeId);
   const token = useAuthStore((state) => state.token);
@@ -203,6 +228,16 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/oauth-success" element={<OAuthSuccess />} />
 
+        <Route path="/about" element={<PublicContentPage pageKey="about" />} />
+        <Route path="/faq" element={<PublicContentPage pageKey="faq" />} />
+        <Route path="/how-to-play" element={<PublicContentPage pageKey="how-to-play" />} />
+        <Route path="/modes" element={<ModesRoute />} />
+        <Route path="/daily-challenge" element={<PublicContentPage pageKey="daily-challenge" />} />
+        <Route path="/privacy" element={<PublicContentPage pageKey="privacy" />} />
+        <Route path="/terms" element={<PublicContentPage pageKey="terms" />} />
+        <Route path="/contact" element={<PublicContentPage pageKey="contact" />} />
+        <Route path="/support" element={<Navigate to="/contact" replace />} />
+
         <Route
           path="/"
           element={(
@@ -212,7 +247,6 @@ export default function App() {
           )}
         >
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="modes" element={<ModeSelectionPage />} />
           <Route path="game" element={<GamePage />} />
           <Route path="results" element={<ResultsPage />} />
           <Route path="profile" element={<ProfilePage />} />
@@ -220,12 +254,6 @@ export default function App() {
           <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="achievements" element={<InfoPage title="Achievements" body="Здесь будут детальные карточки достижений и прогресс по бейджам." />} />
         </Route>
-
-        <Route path="/about" element={<InfoPage title="About" body="Math Game помогает развивать скорость счёта через игровые раунды." />} />
-        <Route path="/faq" element={<InfoPage title="FAQ" body="Скоро здесь появятся ответы на частые вопросы пользователей." />} />
-        <Route path="/privacy" element={<InfoPage title="Privacy Policy" body="Черновик политики конфиденциальности для будущего публичного запуска." />} />
-        <Route path="/terms" element={<InfoPage title="Terms" body="Черновик пользовательского соглашения." />} />
-        <Route path="/support" element={<InfoPage title="Support" body="Свяжитесь с нами: support@math-game.app" />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
