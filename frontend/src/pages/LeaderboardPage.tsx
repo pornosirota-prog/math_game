@@ -37,9 +37,14 @@ export const LeaderboardPage = () => {
 
   return (
     <div className="layout">
-      <section className="card">
-        <h1>Лидерборд игроков</h1>
-        <p>Один игрок = одна строка. Без повторов: показываем количество игр, лучший счёт и максимальный уровень.</p>
+      <section className="card leaderboard-card">
+        <div className="leaderboard-page-header">
+          <div>
+            <h1>Лидерборд игроков</h1>
+            <p>Один игрок = одна строка. Без повторов: показываем количество игр, лучший счёт и максимальный уровень.</p>
+          </div>
+          <span className="leaderboard-badge">Сезон 2026</span>
+        </div>
         {playersLeaderboard.length === 0 ? (
           <p>Пока нет записей — сыграй первый матч, чтобы заполнить рейтинг.</p>
         ) : (
