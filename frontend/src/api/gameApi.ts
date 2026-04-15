@@ -2,8 +2,6 @@ import { apiClient } from './client';
 import { BoostDto, ChestDefinition, OpenChestResponse, PlayerProfile, PlayerProgress } from '../types/game';
 
 export const gameApi = {
-  register: (email: string, password: string, displayName: string) =>
-    apiClient.post('/auth/register', { email, password, displayName }),
   login: (email: string, password: string) => apiClient.post('/auth/login', { email, password }),
   me: () => apiClient.get<PlayerProfile>('/auth/me'),
   profile: () => apiClient.get<PlayerProfile>('/player/profile'),
