@@ -11,7 +11,14 @@ export const ProfilePage = () => {
   const { progress, stats, sessions, achievements } = useMathTrainer({ autoStart: false });
 
   useEffect(() => {
-    gameApi.profile().then((r) => setProfile(r.data)).catch(() => setProfile(null));
+    gameApi.profile()
+      .then((r) => {
+        setProfile(r.data);
+        if (r.data.displayName?.trim()) {
+          localStorage.setItem('mathflow.playerName', r.data.displayName.trim());
+        }
+      })
+      .catch(() => setProfile(null));
   }, []);
 
   const favoriteMode = Object.entries(stats.byMode).sort((a, b) => b[1].played - a[1].played)[0]?.[0] ?? 'classic';
