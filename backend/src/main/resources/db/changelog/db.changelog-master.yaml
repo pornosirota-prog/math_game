@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-schema-from-sql
+      author: codex
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/001-create-schema.sql
+            relativeToChangelogFile: false
+
+  - changeSet:
+      id: 002-seed-local-demo-player
+      author: codex
+      context: local
+      changes:
+        - insert:
+            tableName: players
+            columns:
+              - column: { name: email, value: demo@game.local }
+              - column: { name: display_name, value: DemoPlayer }
+              - column: { name: password_hash, value: '$2a$10$4QxBqg0x5H.Kq8XNYQXWxe9f/68kYjgm2iUZfM7WmfLw4f8gFvF8S' }
+              - column: { name: auth_provider, value: LOCAL }
+              - column: { name: level, valueNumeric: 1 }
+              - column: { name: experience, valueNumeric: 0 }
+              - column: { name: coins, valueNumeric: 100 }
+              - column: { name: energy, valueNumeric: 20 }
+              - column: { name: created_at, valueComputed: CURRENT_TIMESTAMP }
+              - column: { name: updated_at, valueComputed: CURRENT_TIMESTAMP }
+
+  - changeSet:
+      id: 003-postgres-column-comments
+      author: codex
+      dbms: postgresql
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/postgres-column-comments.sql
+            relativeToChangelogFile: false
