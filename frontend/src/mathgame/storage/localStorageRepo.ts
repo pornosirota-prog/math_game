@@ -6,6 +6,32 @@ const LEADERBOARD_KEY = 'mathflow.leaderboard.v1';
 const STATS_KEY = 'mathflow.stats.v1';
 const SESSIONS_KEY = 'mathflow.sessions.v1';
 const DAILY_CHALLENGE_KEY = 'mathflow.daily.v1';
+const TOKEN_KEY = 'token';
+
+const decodeBase64Url = (value: string) => {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+  return atob(padded);
+};
+
+const resolveStorageScope = (): string => {
+  try {
+    const token = sessionStorage.getItem(TOKEN_KEY) ?? localStorage.getItem(TOKEN_KEY);
+    if (!token) return 'guest';
+    const payloadPart = token.split('.')[1];
+    if (!payloadPart) return 'guest';
+    const payload = JSON.parse(decodeBase64Url(payloadPart)) as Record<string, unknown>;
+    const scopeCandidate = payload.sub ?? payload.email ?? payload.userId;
+    if (typeof scopeCandidate !== 'string') return 'guest';
+    const normalized = scopeCandidate.trim().toLowerCase();
+    if (!normalized) return 'guest';
+    return normalized.replace(/[^a-z0-9._@-]/g, '_');
+  } catch {
+    return 'guest';
+  }
+};
+
+export const scopedStorageKey = (key: string) => `${key}:${resolveStorageScope()}`;
 
 export interface GameSessionRecord {
   id: string;
@@ -69,7 +95,7 @@ const formatChallengeDate = (date = new Date()) => date.toISOString().slice(0, 1
 
 const readJson = <T>(key: string, fallback: T): T => {
   try {
-    const raw = localStorage.getItem(key);
+    const raw = localStorage.getItem(scopedStorageKey(key));
     if (!raw) return fallback;
     return { ...fallback, ...JSON.parse(raw) };
   } catch {
@@ -79,7 +105,7 @@ const readJson = <T>(key: string, fallback: T): T => {
 
 export const loadProgress = (): PlayerMetaProgress => {
   try {
-    const raw = localStorage.getItem(PROGRESS_KEY);
+    const raw = localStorage.getItem(scopedStorageKey(PROGRESS_KEY));
     if (!raw) return defaultProgress;
     return { ...defaultProgress, ...JSON.parse(raw) };
   } catch {
@@ -88,7 +114,7 @@ export const loadProgress = (): PlayerMetaProgress => {
 };
 
 export const saveProgress = (progress: PlayerMetaProgress) => {
-  localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+  localStorage.setItem(scopedStorageKey(PROGRESS_KEY), JSON.stringify(progress));
 };
 
 export const loadLeaderboard = (): LeaderboardRecord[] => {
@@ -110,12 +136,12 @@ export const addLeaderboardRecord = (record: LeaderboardRecord): LeaderboardReco
 export const loadStats = (): PlayerStats => readJson(STATS_KEY, DEFAULT_STATS);
 
 export const saveStats = (stats: PlayerStats) => {
-  localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+  localStorage.setItem(scopedStorageKey(STATS_KEY), JSON.stringify(stats));
 };
 
 export const loadSessionHistory = (): GameSessionRecord[] => {
   try {
-    return JSON.parse(localStorage.getItem(SESSIONS_KEY) ?? '[]');
+    return JSON.parse(localStorage.getItem(scopedStorageKey(SESSIONS_KEY)) ?? '[]');
   } catch {
     return [];
   }
@@ -181,7 +207,7 @@ export const recordFinishedRun = (params: {
   };
 
   const nextSessions = [nextSession, ...sessions].slice(0, 30);
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify(nextSessions));
+  localStorage.setItem(scopedStorageKey(SESSIONS_KEY), JSON.stringify(nextSessions));
 
   const previous = loadStats();
   const totalGames = previous.totalGames + 1;
@@ -230,7 +256,7 @@ export const recordFinishedRun = (params: {
     completed,
     completedAt: completed ? (daily.completedAt ?? new Date().toISOString()) : undefined
   };
-  localStorage.setItem(DAILY_CHALLENGE_KEY, JSON.stringify(nextDaily));
+  localStorage.setItem(scopedStorageKey(DAILY_CHALLENGE_KEY), JSON.stringify(nextDaily));
 
   return { stats, sessions: nextSessions, achievements, daily: nextDaily };
 };
@@ -247,7 +273,7 @@ export const loadDailyChallenge = (): DailyChallengeState => {
   };
 
   try {
-    const raw = localStorage.getItem(DAILY_CHALLENGE_KEY);
+    const raw = localStorage.getItem(scopedStorageKey(DAILY_CHALLENGE_KEY));
     if (!raw) return fallback;
     const parsed = JSON.parse(raw) as DailyChallengeState;
     if (parsed.challengeDate === today) return parsed;
@@ -260,7 +286,7 @@ export const loadDailyChallenge = (): DailyChallengeState => {
       modeId,
       targetScore: 500 + day * 10
     };
-    localStorage.setItem(DAILY_CHALLENGE_KEY, JSON.stringify(nextChallenge));
+    localStorage.setItem(scopedStorageKey(DAILY_CHALLENGE_KEY), JSON.stringify(nextChallenge));
     return nextChallenge;
   } catch {
     return fallback;

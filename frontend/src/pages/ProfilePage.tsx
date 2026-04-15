@@ -3,6 +3,7 @@ import { PlayerProfile } from '../types/game';
 import { gameApi } from '../api/gameApi';
 import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { scopedStorageKey } from '../mathgame/storage/localStorageRepo';
 
 export const ProfilePage = () => {
   usePageMeta('Профиль — Math Game', 'Профиль игрока: уровень, общий прогресс, любимый режим, статистика, достижения и история сессий.', { noindex: true });
@@ -15,7 +16,7 @@ export const ProfilePage = () => {
       .then((r) => {
         setProfile(r.data);
         if (r.data.displayName?.trim()) {
-          localStorage.setItem('mathflow.playerName', r.data.displayName.trim());
+          localStorage.setItem(scopedStorageKey('mathflow.playerName'), r.data.displayName.trim());
         }
       })
       .catch(() => setProfile(null));
