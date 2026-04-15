@@ -4,7 +4,7 @@ export const LandingPage = () => (
   <div className="layout">
     <section className="card landing-hero">
       <p className="hero-kicker">Math Neon Arena</p>
-      <h1>Тренажёр, где математика превращается в игру</h1>
+      <h1>Math Game, где математика становится игрой</h1>
       <p>
         Выбирай режимы, закрывай ежедневные задания, следи за прогрессом и поднимайся в лидерборде.
       </p>
