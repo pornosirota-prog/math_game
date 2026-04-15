@@ -19,10 +19,10 @@ mvn spring-boot:run
 ```
 
 Backend поднимется на `http://localhost:8080`.
-
+postgresql://neondb_owner:npg_Vx3hieE0FZkK@ep-lingering-surf-albswyft.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require
 ## Запуск frontend
 ```bash
-cd frontend
+cd I:\math_game\frontend
 npm install
 npm run dev
 ```
