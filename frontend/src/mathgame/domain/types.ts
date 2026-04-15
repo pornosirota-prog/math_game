@@ -116,6 +116,7 @@ export interface PlayerMetaProgress {
 
 export interface LeaderboardRecord {
   id: string;
+  playerName?: string;
   score: number;
   modeId: GameModeId;
   accuracy: number;

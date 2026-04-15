@@ -39,6 +39,10 @@ export interface AttemptSnapshot {
 }
 
 const MAX_ATTEMPT_HISTORY = 24;
+const LOCAL_PLAYER_NAME_KEY = 'mathflow.playerName';
+
+const resolvePlayerName = () => localStorage.getItem(LOCAL_PLAYER_NAME_KEY)?.trim() || 'Player';
+
 const taskKindsForMode = (currentModeId: GameModeId, unlockedTaskKinds: TaskKind[]): TaskKind[] =>
   currentModeId === 'equations' ? ['equation'] : unlockedTaskKinds;
 
@@ -149,6 +153,7 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
 
     const record: LeaderboardRecord = {
       id: crypto.randomUUID(),
+      playerName: resolvePlayerName(),
       score: finalRun.score,
       modeId: finalRun.modeId,
       accuracy,

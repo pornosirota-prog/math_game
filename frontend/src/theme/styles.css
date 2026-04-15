@@ -139,9 +139,9 @@ a { color: #b9ddff; }
   margin-top: 12px;
   margin-bottom: 8px;
   padding: 12px 16px;
-  border: 1px solid #c7dbb5;
-  border-radius: 2px;
-  background: linear-gradient(180deg, #edf7e5 0%, #e3efd8 100%);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: var(--card);
 }
 
 .brand-title {
@@ -160,15 +160,15 @@ a { color: #b9ddff; }
   text-decoration: none;
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid #2a7b2b;
+  border: 1px solid color-mix(in srgb, var(--primary) 70%, #000 30%);
   color: #fff;
-  background: linear-gradient(120deg, #2f8f2e, #56af45);
+  background: linear-gradient(120deg, var(--primary), color-mix(in srgb, var(--primary) 72%, #ffffff 28%));
 }
 
 .card {
   background: var(--card);
   border: 1px solid var(--card-border);
-  border-radius: 2px;
+  border-radius: 16px;
   padding: 18px;
   margin-bottom: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -354,30 +354,30 @@ input:focus {
 .trainer-shell { min-height: calc(100vh - 64px); }
 .trainer-toolbar {
   min-height: 56px;
-  border-top: 1px solid #c7dbb5;
-  border-bottom: 1px solid #c7dbb5;
+  border-top: 1px solid var(--card-border);
+  border-bottom: 1px solid var(--card-border);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 0 16px;
-  background: linear-gradient(180deg, #edf7e5 0%, #e3efd8 100%);
+  background: var(--card);
 }
 .trainer-nav-left { display: flex; gap: 12px; align-items: center; }
-.trainer-nav-left a { text-decoration: none; color: #5e7757; font-size: 15px; }
-.trainer-toolbar-title { justify-self: center; letter-spacing: 0.34em; color: #88a47d; font-weight: 500; }
+.trainer-nav-left a { text-decoration: none; color: var(--text-secondary); font-size: 15px; }
+.trainer-toolbar-title { justify-self: center; letter-spacing: 0.34em; color: var(--text-secondary); font-weight: 600; }
 .profile-dropdown { justify-self: end; }
-.profile-dropdown summary { list-style: none; color: #65815f; }
+.profile-dropdown summary { list-style: none; color: var(--text-secondary); }
 .trainer-main { max-width: 1300px; margin: 0 auto; }
 
 .trainer-game { min-height: calc(100vh - 150px); display: grid; align-content: start; }
 .trainer-progress-wrap { padding-top: 16px; display: flex; justify-content: center; }
-.trainer-progress { width: min(520px, 80%); height: 24px; background: #d7e7c8; border: 1px solid #bfd7a6; }
-.trainer-progress > div { height: 100%; background: linear-gradient(90deg, #2f8f2e 0%, #62b94c 100%); }
-.trainer-problem-wrap { text-align: center; padding-top: 18vh; }
+.trainer-progress { width: min(360px, 100%); height: 12px; border-radius: 999px; overflow: hidden; background: color-mix(in srgb, var(--bg-secondary) 84%, #fff 16%); border: 1px solid var(--card-border); }
+.trainer-progress > div { height: 100%; background: linear-gradient(90deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff 30%) 100%); }
+.trainer-problem-wrap { text-align: center; padding-top: clamp(28px, 8vh, 90px); }
 .trainer-problem-wrap .answer-form { margin-top: 16px; }
 .trainer-problem-wrap .answer-form input { border: none; background: transparent; border-bottom: 1px solid #bad3a8; border-radius: 0; width: 180px; text-align: center; font-size: 40px; padding: 4px 8px; }
 .trainer-problem-wrap .answer-form button { display: none; }
-.trainer-qmark { font-size: clamp(4rem, 8vw, 7rem); color: #a4be96; line-height: 1; margin-top: 6px; }
+.trainer-qmark { font-size: clamp(4rem, 8vw, 7rem); color: color-mix(in srgb, var(--text-secondary) 60%, transparent); line-height: 1; margin-top: 6px; }
 .trainer-control-row { justify-content: center; margin-top: 18px; }
 .trainer-stats,
 .trainer-board { display: none; }
@@ -581,8 +581,8 @@ input:focus {
 }
 
 .game-hud-grid div {
-  background: rgba(255, 255, 255, 0.45);
-  border: 1px solid #c7dbb5;
+  background: color-mix(in srgb, var(--card) 75%, #ffffff 25%);
+  border: 1px solid var(--card-border);
   border-radius: 10px;
   padding: 10px;
   display: grid;
@@ -719,7 +719,7 @@ input:focus {
 .leaderboard-table td {
   padding: 10px;
   border-bottom: 1px solid var(--card-border);
-  text-align: left;
+  text-align: center;
 }
 
 .mode-bars,

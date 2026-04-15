@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { Link, useNavigate } from 'react-router-dom';
 
 const GOOGLE_AUTH_URL = 'http://localhost:8080/oauth2/authorization/google';
+const LOCAL_PLAYER_NAME_KEY = 'mathflow.playerName';
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false" className="google-icon">
@@ -24,6 +25,8 @@ export const LoginPage = () => {
     e.preventDefault();
     const response = await gameApi.login(email, password);
     setToken(response.data.token);
+    const fallbackName = email.split('@')[0] || 'Player';
+    localStorage.setItem(LOCAL_PLAYER_NAME_KEY, fallbackName);
     navigate('/dashboard');
   };
 
