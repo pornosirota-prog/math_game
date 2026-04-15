@@ -48,7 +48,7 @@ export const DashboardPage = () => {
       </section>
 
       <section className="trainer-bottom-cta">
-        <Link className="trainer-play-btn" to="/game?mode=classic">PLAY 3 QUESTIONS</Link>
+        <Link className="trainer-play-btn" to="/game?mode=classic">PLAY</Link>
       </section>
     </div>
   );
