@@ -1,26 +1,46 @@
 import { Link } from 'react-router-dom';
+import { GameModeId } from '../mathgame/domain/types';
+import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
+import { usePageMeta } from '../hooks/usePageMeta';
 
-const modes = [
-  ['classic', 'Классика', 'Сбалансированный режим для ежедневной тренировки.'],
-  ['sprint60', 'Спринт', 'Максимум очков за короткое время.'],
-  ['twenty', '20 задач', 'Режим на скорость и точность на фиксированном объёме.'],
-  ['streak', 'Без ошибок', 'Одна ошибка может завершить раунд.'],
-  ['equations', 'Уравнения', 'Больше алгебры и сложных задач.'],
-  ['infinite', 'Обучение', 'Спокойный бесконечный режим для прокачки.']
-] as const;
+const modes: Array<{ id: GameModeId; title: string; description: string; difficulty: string; locked?: boolean }> = [
+  { id: 'classic', title: 'Classic', description: 'Сбалансированный режим для ежедневной тренировки.', difficulty: 'Низкая' },
+  { id: 'sprint60', title: 'Sprint', description: 'Максимум очков за 60 секунд.', difficulty: 'Средняя' },
+  { id: 'streak', title: 'Survival', description: 'Ошибка завершает раунд.', difficulty: 'Высокая' },
+  { id: 'twenty', title: 'Streak', description: '20 задач на скорость и точность.', difficulty: 'Средняя' },
+  { id: 'infinite', title: 'Training', description: 'Бесконечный режим для обучения.', difficulty: 'Низкая' },
+  { id: 'equations', title: 'Equations', description: 'Алгебраические задания (planned).', difficulty: 'Высокая', locked: true }
+];
 
-export const ModeSelectionPage = () => (
-  <div className="layout">
-    <h2>Выбор режима</h2>
-    <div className="quick-grid">
-      {modes.map(([id, title, description], index) => (
-        <article className="card" key={id}>
-          <h3>{title}</h3>
-          <p>{description}</p>
-          <p>Сложность: {index < 2 ? 'Низкая' : index < 4 ? 'Средняя' : 'Высокая'}</p>
-          <Link className="cta-link" to={`/game?mode=${id}`}>Start</Link>
-        </article>
-      ))}
+export const ModeSelectionPage = () => {
+  usePageMeta('Режимы — Math Game', 'Выберите игровой режим: Classic, Sprint, Survival, Streak, Training и Equations.');
+
+  const { stats, progress } = useMathTrainer({ autoStart: false });
+
+  return (
+    <div className="layout">
+      <h1>Выбор режима</h1>
+      <div className="quick-grid">
+        {modes.map((mode) => {
+          const modeStats = stats.byMode[mode.id];
+          const isUnlocked = !mode.locked && progress.unlockedModes.includes(mode.id);
+
+          return (
+            <article className="card" key={mode.id}>
+              <h3>{mode.title}</h3>
+              <p>{mode.description}</p>
+              <p>Сложность: {mode.difficulty}</p>
+              <p>Лучший рекорд: {modeStats?.bestScore ?? 0}</p>
+              <p>Статус: {isUnlocked ? 'Открыт' : 'Locked / planned'}</p>
+              {isUnlocked ? (
+                <Link className="cta-link" to={`/game?mode=${mode.id}`}>Start</Link>
+              ) : (
+                <button type="button" disabled>Скоро</button>
+              )}
+            </article>
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};

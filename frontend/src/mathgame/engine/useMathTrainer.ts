@@ -5,7 +5,17 @@ import { TaskFactory } from '../generators/TaskFactory';
 import { DifficultyEngine } from '../systems/DifficultyEngine';
 import { ScoreSystem } from '../systems/ScoreSystem';
 import { ProgressionSystem } from '../systems/ProgressionSystem';
-import { addLeaderboardRecord, loadLeaderboard, loadProgress, saveProgress } from '../storage/localStorageRepo';
+import {
+  addLeaderboardRecord,
+  loadAchievements,
+  loadDailyChallenge,
+  loadLeaderboard,
+  loadProgress,
+  loadSessionHistory,
+  loadStats,
+  recordFinishedRun,
+  saveProgress
+} from '../storage/localStorageRepo';
 import { soundManager } from '../../sound/soundManager';
 import { useSettingsStore } from '../../store/settingsStore';
 
@@ -69,10 +79,14 @@ const buildRunState = (modeId: GameModeId): RunState => {
   };
 };
 
-export const useMathTrainer = () => {
+export const useMathTrainer = (options?: { autoStart?: boolean }) => {
   const [modeId, setModeId] = useState<GameModeId>(defaultModeId as GameModeId);
   const [progress, setProgress] = useState(loadProgress());
   const [leaderboard, setLeaderboard] = useState<LeaderboardRecord[]>(loadLeaderboard());
+  const [stats, setStats] = useState(loadStats());
+  const [sessions, setSessions] = useState(loadSessionHistory());
+  const [achievements, setAchievements] = useState(loadAchievements());
+  const [dailyChallenge, setDailyChallenge] = useState(loadDailyChallenge());
   const [run, setRun] = useState<RunState>(() => buildRunState(defaultModeId as GameModeId));
   const [flow, setFlow] = useState<FlowState>(initialFlow);
   const [task, setTask] = useState<GeneratedTask | null>(null);
@@ -136,6 +150,27 @@ export const useMathTrainer = () => {
       levelReached: updatedProgress.level
     };
     setLeaderboard(addLeaderboardRecord(record));
+
+    const outcome = recordFinishedRun({
+      session: {
+        playedAt: new Date().toISOString(),
+        modeId: finalRun.modeId,
+        score: finalRun.score,
+        accuracy,
+        avgAnswerMs: finalRun.answered > 0 ? Math.round((Date.now() - finalRun.startedAt) / finalRun.answered) : 0,
+        durationMs: Date.now() - finalRun.startedAt,
+        bestCombo: finalRun.bestCombo
+      },
+      progress: updatedProgress,
+      answered: finalRun.answered,
+      correct: finalRun.correct,
+      incorrect: finalRun.incorrect
+    });
+
+    setStats(outcome.stats);
+    setSessions(outcome.sessions);
+    setAchievements(outcome.achievements);
+    setDailyChallenge(outcome.daily);
     setIsFinished(true);
     notifyRunFinished(finalRun.score, accuracy);
   };
@@ -227,9 +262,10 @@ export const useMathTrainer = () => {
   };
 
   useEffect(() => {
+    if (options?.autoStart === false) return;
     startRun(defaultModeId as GameModeId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [options?.autoStart]);
 
   useEffect(() => {
     if (isFinished || !run.endsAt) return;
@@ -258,6 +294,10 @@ export const useMathTrainer = () => {
     isFinished,
     lastFeedback,
     availableModes: modeRegistry.filter((mode) => progress.unlockedModes.includes(mode.id)),
+    stats,
+    sessions,
+    achievements,
+    dailyChallenge,
     startRun,
     submitAnswer
   };

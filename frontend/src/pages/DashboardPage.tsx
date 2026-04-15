@@ -1,54 +1,68 @@
 import { Link } from 'react-router-dom';
-import { loadLeaderboard, loadProgress } from '../mathgame/storage/localStorageRepo';
+import { useMathTrainer } from '../mathgame/engine/useMathTrainer';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export const DashboardPage = () => {
-  const progress = loadProgress();
-  const leaderboard = loadLeaderboard();
+  usePageMeta('Dashboard — Math Game', 'Центр игрока: уровень, лучший результат, daily challenge, режимы и краткая статистика.');
 
-  const totalGames = progress.totalRuns;
-  const bestScore = progress.bestScore;
-  const totalXp = progress.xp;
-  const averageScore = leaderboard.length > 0
-    ? Math.round(leaderboard.reduce((sum, run) => sum + run.score, 0) / leaderboard.length)
-    : 0;
-  const bestAccuracy = leaderboard.length > 0
-    ? Math.max(...leaderboard.map((run) => Math.round(run.accuracy)))
-    : 0;
+  const { progress, stats, sessions, achievements, dailyChallenge } = useMathTrainer({ autoStart: false });
+  const recent = sessions[0];
+  const unlockedAchievements = achievements.filter((item) => item.unlocked).length;
+  const xpProgress = progress.xp % 1000;
 
   return (
     <div className="layout trainer-dashboard">
-      <section className="trainer-grid3">
-        <article className="card trainer-panel">
-          <div className="vertical-problem">3<br />+ 3<br /><span>6</span></div>
-          <p>This question should be memorized.</p>
-          <p>Review addition table for 3:</p>
-          <div className="small-table">3 + 1 = 4<br />3 + 2 = 5<br />3 + 3 = 6<br />3 + 4 = 7<br />3 + 5 = 8</div>
+      <section className="card dashboard-hero">
+        <h1>Привет! Готов к новому рекорду?</h1>
+        <p>Уровень {progress.level} • XP {progress.xp}</p>
+        <div className="xp-track"><div style={{ width: `${Math.min(100, (xpProgress / 1000) * 100)}%` }} /></div>
+      </section>
+
+      <section className="quick-grid">
+        <article className="card">
+          <h3>Лучший результат</h3>
+          <p>{stats.bestScore}</p>
         </article>
-        <article className="card trainer-panel trainer-panel-center">
-          <div className="big-number">{totalGames}</div>
-          <h3>GAMES PLAYED</h3>
+        <article className="card">
+          <h3>Последняя игра</h3>
+          <p>{recent ? `${recent.score} очков • ${Math.round(recent.accuracy * 100)}%` : 'Пока нет игр'}</p>
         </article>
-        <article className="card trainer-panel trainer-panel-center">
-          <div className="big-number">{progress.level}</div>
-          <h3>SKILL LEVEL</h3>
-          <p>XP&nbsp; {totalXp}</p>
+        <article className="card">
+          <h3>Достижения</h3>
+          <p>{unlockedAchievements} / {achievements.length} открыто</p>
         </article>
       </section>
 
-      <section className="trainer-grid2">
-        <article className="card trainer-panel trainer-panel-center">
-          <div className="big-number">{bestScore}</div>
-          <h3>BEST SCORE</h3>
+      <section className="quick-grid">
+        <article className="card">
+          <h3>Daily challenge</h3>
+          <p>Режим: {dailyChallenge.modeId}</p>
+          <p>Цель: {dailyChallenge.targetScore} очков</p>
+          <p>Прогресс: {dailyChallenge.progressScore} / {dailyChallenge.targetScore}</p>
+          <p>Награда: +{dailyChallenge.rewardXp} XP</p>
+          <Link className="cta-link" to={`/game?mode=${dailyChallenge.modeId}`}>Начать челлендж</Link>
         </article>
-        <article className="card trainer-panel trainer-panel-center">
-          <div className="time-filter">Avg score: <span>{averageScore}</span></div>
-          <div className="big-number">{bestAccuracy}<span>%</span></div>
-          <h3>BEST ACCURACY</h3>
+
+        <article className="card">
+          <h3>Быстрый старт</h3>
+          <p>Начни раунд в выбранном режиме.</p>
+          <div className="row">
+            <Link className="cta-link" to="/modes">Выбрать режим</Link>
+            <Link className="cta-link secondary" to="/game?mode=classic">Играть Classic</Link>
+          </div>
         </article>
       </section>
 
-      <section className="trainer-bottom-cta">
-        <Link className="trainer-play-btn" to="/game?mode=classic">PLAY</Link>
+      <section className="card">
+        <h3>Краткая статистика</h3>
+        <div className="quick-grid">
+          <p>Игр сыграно: <strong>{stats.totalGames}</strong></p>
+          <p>Правильных: <strong>{stats.totalCorrect}</strong></p>
+          <p>Неправильных: <strong>{stats.totalIncorrect}</strong></p>
+          <p>Средняя точность: <strong>{Math.round(stats.averageAccuracy * 100)}%</strong></p>
+          <p>Среднее время ответа: <strong>{Math.round(stats.averageAnswerMs)} мс</strong></p>
+          <p>Лучший стрик: <strong>x{stats.bestStreak}</strong></p>
+        </div>
       </section>
     </div>
   );

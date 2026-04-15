@@ -1,6 +1,10 @@
+import { useAuthStore } from '../store/authStore';
 import { useSettingsStore } from '../store/settingsStore';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export const SettingsPage = () => {
+  usePageMeta('Настройки — Math Game', 'Настройки игры: звук, музыка, тема, язык, управление, уведомления и безопасный logout.');
+
   const {
     soundEnabled,
     musicEnabled,
@@ -11,10 +15,11 @@ export const SettingsPage = () => {
     setNotificationsEnabled,
     setDarkThemeEnabled
   } = useSettingsStore();
+  const setToken = useAuthStore((state) => state.setToken);
 
   return (
     <div className="layout card">
-      <h2>Настройки</h2>
+      <h1>Настройки</h1>
       <div className="quick-grid">
         <label className="setting-item">
           <span>Звук</span>
@@ -40,6 +45,23 @@ export const SettingsPage = () => {
             onChange={(event) => setDarkThemeEnabled(event.target.checked)}
           />
         </label>
+        <label className="setting-item">
+          <span>Язык</span>
+          <select defaultValue="ru">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <label className="setting-item">
+          <span>Управление</span>
+          <select defaultValue="keyboard">
+            <option value="keyboard">Keyboard</option>
+            <option value="numpad">Numpad</option>
+          </select>
+        </label>
+      </div>
+      <div className="row" style={{ marginTop: 16 }}>
+        <button type="button" onClick={() => setToken(null)}>Logout</button>
       </div>
     </div>
   );

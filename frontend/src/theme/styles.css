@@ -481,3 +481,73 @@ input:focus {
 .auth-card .row {
   gap: 10px;
 }
+
+.game-hud-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.game-hud-grid div {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid #c7dbb5;
+  border-radius: 10px;
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.game-hud-grid span { color: var(--text-secondary); font-size: 0.85rem; }
+.game-start-card { text-align: left; }
+.game-start-card h2 { margin-top: 0; }
+
+.xp-track {
+  height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #b9cca8;
+  background: #d7e7c8;
+}
+
+.xp-track > div {
+  height: 100%;
+  background: linear-gradient(90deg, #2f8f2e 0%, #62b94c 100%);
+}
+
+.trainer-nav-left {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.site-footer {
+  margin-top: 24px;
+  padding-bottom: 24px;
+  border-top: 1px solid #c7dbb5;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  color: #5f7958;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.footer-links a {
+  color: #496444;
+  text-decoration: none;
+  border: 1px solid #bcd2ae;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.setting-item select {
+  border: 1px solid #c8dcb7;
+  border-radius: 10px;
+  padding: 6px 10px;
+}
