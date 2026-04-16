@@ -1181,44 +1181,96 @@ input:focus {
   gap: 16px;
 }
 
-.strategy-header-card {
-  background: linear-gradient(120deg, rgba(81, 139, 255, 0.18), rgba(117, 76, 219, 0.18));
+.strategy-layout .card {
+  border-radius: 24px;
+  background: rgba(245, 250, 236, 0.93);
+  border-color: #c4d9b2;
+}
+
+.strategy-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.strategy-retreat-link {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ed7052, #de4d39);
+  border: 1px solid rgba(158, 51, 39, 0.5);
+}
+
+.strategy-resource-panel {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.strategy-resource-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 14px;
+  background: #3e596f;
+  color: #f9fcf6;
+  padding: 8px 14px;
 }
 
 .strategy-main-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 1fr 1.15fr;
   gap: 16px;
+  align-items: start;
 }
 
 .strategy-map-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.strategy-map-card {
+  min-height: 560px;
 }
 
 .strategy-tile {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   gap: 4px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 10px;
-  background: var(--panel-bg);
+  border: 1px solid rgba(82, 100, 80, 0.22);
+  border-radius: 0;
+  clip-path: polygon(25% 4%, 75% 4%, 96% 50%, 75% 96%, 25% 96%, 4% 50%);
+  min-height: 140px;
+  padding: 16px 12px;
+  font-weight: 700;
+  background: #ffe39f;
+  color: #54422a;
 }
 
 .strategy-tile.owned {
-  border-color: #6adf97;
-  background: rgba(84, 192, 123, 0.18);
+  background: #b5de97;
+  color: #25482b;
 }
 
 .strategy-tile.neutral {
-  border-color: #5f6f9f;
+  background: #ff8f73;
+  color: #5b2a20;
 }
 
 .strategy-tile.selected {
-  outline: 2px solid #ffd166;
+  outline: 4px solid #f8c55c;
+}
+
+.strategy-tile-type {
+  opacity: 0.8;
+  font-size: 0.85rem;
 }
 
 .strategy-stats-grid {
@@ -1234,27 +1286,69 @@ input:focus {
 }
 
 .strategy-progress {
-  height: 12px;
+  height: 26px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: #39526a;
+  padding: 3px;
   overflow: hidden;
 }
 
 .strategy-progress > div {
   height: 100%;
-  background: linear-gradient(90deg, #34d399, #2dd4bf);
+  border-radius: 999px;
+  background: linear-gradient(90deg, #9bdd5d, #7ec83e);
 }
 
 .strategy-task {
   font-size: 2rem;
   font-weight: 700;
-  margin: 8px 0;
+  margin: 0;
+}
+
+.strategy-battle-card {
+  display: grid;
+  gap: 16px;
+}
+
+.strategy-battle-intro {
+  text-align: center;
+  display: grid;
+  gap: 10px;
+}
+
+.strategy-battle-intro h2 {
+  margin: 6px 0;
+  font-size: clamp(2rem, 3.5vw, 3.1rem);
+}
+
+.strategy-active-battle {
+  border-radius: 18px;
+  background: linear-gradient(180deg, #3c5870, #30495f);
+  color: #f3f8ee;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.strategy-battle-timer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.strategy-battle-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #e1efd8;
 }
 
 .strategy-last-summary {
-  margin-top: 12px;
-  border-top: 1px solid var(--border-color);
+  margin-top: 6px;
+  border-top: 1px solid #c8d7bb;
   padding-top: 12px;
+  color: #3f4d3e;
 }
 
 .strategy-log-card ul {
@@ -1266,7 +1360,8 @@ input:focus {
 }
 
 .strategy-log-card li {
-  background: var(--panel-muted);
+  background: rgba(56, 85, 111, 0.9);
+  color: #f4faee;
   border-radius: 10px;
   padding: 10px;
 }
@@ -1279,6 +1374,16 @@ input:focus {
 }
 
 @media (max-width: 1024px) {
+  .strategy-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .strategy-resource-panel {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
   .strategy-main-grid {
     grid-template-columns: 1fr;
   }

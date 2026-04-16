@@ -6,7 +6,7 @@ interface ActionLogProps {
 
 export const ActionLog = ({ entries }: ActionLogProps) => (
   <section className="card strategy-log-card">
-    <h2>История действий</h2>
+    <h2>Журнал битвы</h2>
     <ul>
       {entries.map((entry) => (
         <li key={entry.id}>
