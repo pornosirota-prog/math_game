@@ -23,6 +23,13 @@ export const ModeSelectionPage = () => {
     <div className="layout">
       <h1>Выбор режима</h1>
       <div className="quick-grid">
+      <article className="card strategy-mode-preview">
+        <h3>Strategy Mode (MVP)</h3>
+        <p>Отдельный режим с картой территорий, боями и ресурсами.</p>
+        <p>Сложность: Средняя</p>
+        <p>Статус: Открыт</p>
+        <Link className="cta-link" to="/strategy">Открыть стратегию</Link>
+      </article>
         {modes.map((mode) => {
           const modeStats = stats.byMode[mode.id];
           const isUnlocked = !mode.locked && progress.unlockedModes.includes(mode.id);

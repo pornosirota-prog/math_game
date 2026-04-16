@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": ".tmp-strategy-tests",
+    "rootDir": "src",
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/features/strategy/config/**/*.ts",
+    "src/features/strategy/domain/**/*.ts",
+    "src/features/strategy/services/**/*.ts",
+    "src/features/strategy/store/**/*.ts"
+  ]
+}

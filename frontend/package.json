@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:strategy": "tsc -p tsconfig.strategy-tests.json && node -e \"require('fs').writeFileSync('.tmp-strategy-tests/package.json', '{\\\"type\\\":\\\"commonjs\\\"}')\" && node --test tests/strategy.test.cjs"
   },
   "dependencies": {
     "axios": "^1.9.0",
