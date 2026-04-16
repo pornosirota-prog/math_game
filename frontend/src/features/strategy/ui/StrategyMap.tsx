@@ -10,7 +10,6 @@ const ownerClass = (owner: 'player' | 'neutral') => (owner === 'player' ? 'owned
 
 export const StrategyMapView = ({ map, selectedTerritoryId, onSelect }: StrategyMapProps) => (
   <section className="card strategy-map-card">
-    <h2>Карта территорий</h2>
     <div className="strategy-map-grid">
       {map.territories.map((territory) => (
         <button
@@ -20,8 +19,7 @@ export const StrategyMapView = ({ map, selectedTerritoryId, onSelect }: Strategy
           onClick={() => onSelect(territory.id)}
         >
           <strong>{territory.name}</strong>
-          <span>{territory.type}</span>
-          <span>{territory.owner === 'player' ? 'Ваша' : 'Нейтральная'}</span>
+          <span className="strategy-tile-type">{territory.type}</span>
         </button>
       ))}
     </div>

@@ -26,24 +26,28 @@ export const BattlePanel = ({
   canStartBattle
 }: BattlePanelProps) => (
   <section className="card strategy-battle-card">
-    <h2>Бой за территорию</h2>
-    {selectedTerritory && (
-      <p>
-        Цель: <strong>{selectedTerritory.name}</strong> ({selectedTerritory.type})
-      </p>
-    )}
-
     {!activeBattle && (
-      <button type="button" onClick={onStartBattle} disabled={!canStartBattle}>
-        Атаковать территорию
-      </button>
+      <div className="strategy-battle-intro">
+        <h2>Захватите регион</h2>
+        {selectedTerritory ? (
+          <p>
+            Цель: <strong>{selectedTerritory.name}</strong> ({selectedTerritory.type})
+          </p>
+        ) : (
+          <p>Выберите соседний регион на карте, чтобы начать атаку.</p>
+        )}
+        <button type="button" onClick={onStartBattle} disabled={!canStartBattle}>
+          Атаковать регион
+        </button>
+      </div>
     )}
 
     {activeBattle && (
       <div className="strategy-active-battle">
-        <p>Осталось времени: <strong>{Math.max(0, Math.ceil(remainingMs / 1000))}с</strong></p>
-        <p>Серия: <strong>x{activeBattle.streak}</strong>, лучшая: <strong>x{activeBattle.bestStreak}</strong></p>
-        <p className="strategy-task">{activeBattle.currentTask.prompt}</p>
+        <div className="strategy-battle-timer-row">
+          <p className="strategy-task">{activeBattle.currentTask.prompt}</p>
+          <p><strong>{Math.max(0, Math.ceil(remainingMs / 1000))}с</strong></p>
+        </div>
         <div className="row">
           <input
             value={answer}
@@ -62,7 +66,10 @@ export const BattlePanel = ({
         <div className="strategy-progress">
           <div style={{ width: percent(activeBattle.progress) }} />
         </div>
-        <p>Прогресс захвата: <strong>{percent(activeBattle.progress)}</strong></p>
+        <div className="strategy-battle-meta">
+          <span>Серия x{activeBattle.streak} (макс: x{activeBattle.bestStreak})</span>
+          <strong>{percent(activeBattle.progress)}</strong>
+        </div>
       </div>
     )}
 

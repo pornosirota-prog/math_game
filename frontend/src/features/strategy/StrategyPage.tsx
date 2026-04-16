@@ -51,23 +51,12 @@ export const StrategyPage = () => {
 
   return (
     <div className="layout strategy-layout">
-      <section className="card strategy-header-card">
-        <h1>Strategy Mode (MVP)</h1>
-        <p>Решайте примеры, чтобы захватывать соседние территории и усиливать империю.</p>
-        <div className="row">
-          <Link className="cta-link" to="/game?mode=classic">К обычному режиму</Link>
-        </div>
-      </section>
-
-      <ResourcePanel map={state.map} gold={state.resources.gold} supplies={state.resources.supplies} />
+      <div className="strategy-topbar">
+        <Link className="strategy-retreat-link" to="/game?mode=classic">Отступить</Link>
+        <ResourcePanel map={state.map} gold={state.resources.gold} supplies={state.resources.supplies} />
+      </div>
 
       <div className="strategy-main-grid">
-        <StrategyMapView
-          map={state.map}
-          selectedTerritoryId={state.selectedTerritoryId}
-          onSelect={(territoryId) => setState((previous) => selectTerritory(previous, territoryId))}
-        />
-
         <BattlePanel
           selectedTerritory={selectedTerritory}
           activeBattle={state.activeBattle}
@@ -86,6 +75,12 @@ export const StrategyPage = () => {
             setState((previous) => submitBattleAnswer(previous, answer, timestamp, questionStartedAt));
           }}
           canStartBattle={canStartBattle}
+        />
+
+        <StrategyMapView
+          map={state.map}
+          selectedTerritoryId={state.selectedTerritoryId}
+          onSelect={(territoryId) => setState((previous) => selectTerritory(previous, territoryId))}
         />
       </div>
 
