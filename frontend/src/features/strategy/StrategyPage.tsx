@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { usePageMeta } from '../../hooks/usePageMeta';
 import { isTerritoryAttackable } from './domain/map';
 import { createInitialStrategyState, selectTerritory, startBattle, submitBattleAnswer, tickBattle } from './store/strategyGameStore';
+import { loadStrategyState, saveStrategyState } from './services/persistence';
 import { ActionLog } from './ui/ActionLog';
 import { BattlePanel } from './ui/BattlePanel';
 import { ResourcePanel } from './ui/ResourcePanel';
@@ -11,7 +12,7 @@ import { StrategyMapView } from './ui/StrategyMap';
 export const StrategyPage = () => {
   usePageMeta('Strategy Mode — Math Game', 'Захватывайте территории, решая математические задания в коротких боях.', { noindex: true });
 
-  const [state, setState] = useState(() => createInitialStrategyState());
+  const [state, setState] = useState(() => loadStrategyState() ?? createInitialStrategyState());
   const [answer, setAnswer] = useState('');
   const [questionStartedAt, setQuestionStartedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
@@ -46,6 +47,10 @@ export const StrategyPage = () => {
       setAnswer('');
     }
   }, [state.activeBattle?.currentTask.id]);
+
+  useEffect(() => {
+    saveStrategyState(state);
+  }, [state]);
 
   const remainingMs = state.activeBattle ? Math.max(0, state.activeBattle.endsAt - now) : 0;
 
