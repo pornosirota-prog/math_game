@@ -49,13 +49,15 @@ export const createBattleResolver = (taskGenerator: MathTaskGenerator) => {
       enemy.actionsUntilAttack = enemy.attackEveryActions;
     }
 
-    const nextTask = taskGenerator.generate({
-      depth: battle.currentTask.tier,
-      operations: ['+', '-', '*', '/'],
-      min: 2,
-      max: 20 + battle.currentTask.tier,
-      chained: battle.currentTask.tier > 10
-    }, now);
+    const nextTask = isCorrect
+      ? taskGenerator.generate({
+        depth: battle.currentTask.tier,
+        operations: ['+', '-', '*', '/'],
+        min: 2,
+        max: 20 + battle.currentTask.tier,
+        chained: battle.currentTask.tier > 10
+      }, now)
+      : battle.currentTask;
 
     const victory = enemy.hp <= 0;
     const defeat = nextPlayer.hp <= 0;
