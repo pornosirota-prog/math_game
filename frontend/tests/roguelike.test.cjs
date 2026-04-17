@@ -79,6 +79,27 @@ test('relic engine applies stat relics', () => {
   assert.equal(upgraded.baseDamage, 6);
 });
 
+
+test('wrong answer keeps same task so it can be retried', () => {
+  let state = createInitialRunState();
+  state = {
+    ...state,
+    roomChoices: [{ id: 'fight-1', type: 'fight', title: 'Бой', description: '', risk: 2, rewardHint: '' }]
+  };
+  state = chooseRoom(state, 'fight-1', 1000);
+
+  assert.equal(state.status, 'battle');
+  const initialTask = state.activeBattle.currentTask;
+
+  state = resolveBattleAnswer(state, String(initialTask.answer + 1), 1500);
+  assert.equal(state.status, 'battle');
+  assert.equal(state.activeBattle.currentTask.id, initialTask.id);
+
+  state = resolveBattleAnswer(state, String(initialTask.answer), 2100);
+  assert.equal(state.status, 'battle');
+  assert.notEqual(state.activeBattle.currentTask.id, initialTask.id);
+});
+
 test('run progression transitions battle -> reward and supports death summary', () => {
   let state = createInitialRunState();
   state = {
