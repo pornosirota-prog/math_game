@@ -119,14 +119,6 @@ export const GamePage = () => {
 
   const onInputChange = (value: string) => {
     setInput(value);
-    if (isPaused || !task || !isRoundStarted) return;
-    const normalizedValue = value.trim();
-    if (!normalizedValue) return;
-    const numeric = Number(normalizedValue.replace(',', '.'));
-    const isCorrect = Number.isFinite(numeric) && Math.abs(numeric - task.answer) < 0.01;
-    if (!isCorrect) return;
-    submitAnswer(normalizedValue);
-    setInput('');
   };
 
   const goToResults = () => navigate('/results', {
