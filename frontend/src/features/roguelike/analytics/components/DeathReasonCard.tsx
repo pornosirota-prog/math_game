@@ -1,0 +1,1 @@
+export { DeathReasonCard } from './summary';

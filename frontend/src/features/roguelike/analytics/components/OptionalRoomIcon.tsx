@@ -1,0 +1,1 @@
+export { OptionalRoomIcon } from './OptionalVisuals';

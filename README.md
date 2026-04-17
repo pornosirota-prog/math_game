@@ -180,3 +180,69 @@ Flyway миграция `V1__init.sql` создает demo-игрока:
   - применение реликвий;
   - progression run (battle → reward → next depth);
   - формирование summary после смерти.
+
+## Dungeon Analytics (ECharts + optional assets fallback)
+
+Для режима `/roguelike` добавлен изолированный аналитический слой с вкладкой **«Статистика»** и post-run обзором после смерти.
+
+### Что добавлено
+- Пакеты frontend: `echarts`, `echarts-for-react`.
+- Новая аналитическая страница: `frontend/src/features/roguelike/analytics/components/DungeonAnalyticsPage.tsx`.
+- Отдельные chart components:
+  - `DepthProfileChart`, `ErrorHeatmapChart`, `AccuracyDepthChart`, `MathTypeBreakdownChart`.
+- Отдельные builders для ECharts options:
+  - `buildDepthProfileOption.ts`
+  - `buildErrorHeatmapOption.ts`
+  - `buildAccuracyByDepthOption.ts`
+  - `buildMathTypePieOption.ts`
+- Модели аналитики: `frontend/src/features/roguelike/analytics/models/types.ts`.
+- Mapper run state → analytics: `frontend/src/features/roguelike/analytics/utils/runAnalyticsMapper.ts`.
+
+### Optional assets architecture (без обязательных import)
+- Manifest путей: `frontend/src/features/roguelike/assets/assetManifest.ts`.
+- Resolver: `frontend/src/features/roguelike/assets/optionalAssets.ts` (`getOptionalAsset`).
+- Hook проверки загрузки: `frontend/src/features/roguelike/analytics/hooks/useOptionalImage.ts`.
+- Optional-компоненты:
+  - `OptionalBackground`
+  - `OptionalRoomIcon`
+  - `OptionalEnemyPortrait`
+  - `OptionalRelicArt`
+
+### Куда складывать картинки
+Рекомендуемая структура `frontend/public/assets/dungeon/`:
+- `backgrounds/dungeon-main.webp`
+- `backgrounds/dungeon-summary.webp`
+- `backgrounds/dungeon-panel-texture.webp`
+- `ui/frame-top.webp`, `ui/card-stone.webp`, `ui/torch-left.webp`, `ui/torch-right.webp`, `ui/divider.webp`
+- `room-icons/fight.webp`, `elite.webp`, `chest.webp`, `shop.webp`, `rest.webp`, `event.webp`, `death.webp`
+- `enemies/skeleton.webp`, `goblin.webp`, `mage.webp`
+- `relics/relic-book.webp`, `relic-shield.webp`, `relic-crystal.webp`
+- `charts/chart-overlay.webp`, `charts/chart-glow.webp`
+- `fallback/placeholder-room.svg`, `fallback/placeholder-enemy.svg`, `fallback/placeholder-relic.svg`
+
+Если этих файлов нет, UI остаётся рабочим: применяются градиенты, тёмные панели, emoji/SVG fallback-иконки и декоративные placeholders.
+
+### Как добавить новый room type icon
+1. Добавьте файл в `public/assets/dungeon/room-icons/`.
+2. Пропишите путь в `assetManifest.ts`.
+3. Добавьте fallback-эмодзи/иконку в `OptionalRoomIcon`.
+4. При необходимости расширьте `RunRoomType` и mapper.
+
+### Как добавить новый enemy portrait
+1. Положите изображение в `public/assets/dungeon/enemies/`.
+2. Добавьте ключ в `assetManifest.ts`.
+3. Расширьте маппинг выбора портрета в `OptionalEnemyPortrait`.
+
+### Как добавить новый график
+1. Создайте builder в `analytics/charts/`.
+2. Создайте визуальный chart component в `analytics/components/`.
+3. Подключите компонент в `DungeonAnalyticsPage`.
+4. Если нужны данные — расширьте `RunAnalytics` и `runAnalyticsMapper`.
+
+### Тесты
+Добавлены тесты для:
+- mapper run state → analytics
+- построения depth profile option
+- fallback asset resolver/state
+
+Файл: `frontend/tests/roguelike-analytics.test.cjs`.

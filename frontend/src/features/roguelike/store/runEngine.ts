@@ -34,13 +34,13 @@ const createPlayer = () => ({
 
 const pushRunLog = (state: RunState, line: string): RunState => ({
   ...state,
-  runLog: [line, ...state.runLog].slice(0, 10)
+  runLog: [line, ...state.runLog].slice(0, 18)
 });
 
 const nextRoomChoiceState = (state: RunState): RunState => {
-  const history = state.runLog
-    .map((line) => line.match(/\[(.+?)\]/)?.[1])
-    .filter((item): item is RoomType => ['fight', 'treasure', 'event', 'shop', 'rest', 'elite'].includes(item ?? ''));
+  const history = state.runSteps
+    .map((step) => step.roomType)
+    .filter((item): item is RoomType => ['fight', 'treasure', 'event', 'shop', 'rest', 'elite'].includes(item));
 
   return {
     ...state,
@@ -51,6 +51,38 @@ const nextRoomChoiceState = (state: RunState): RunState => {
     activeEvent: null,
     shopOffers: []
   };
+};
+
+const appendStep = (state: RunState, room: RoomDefinition): RunState => ({
+  ...state,
+  runSteps: [
+    ...state.runSteps,
+    {
+      step: state.runSteps.length + 1,
+      roomType: room.type,
+      depth: state.depth,
+      roomTitle: room.title,
+      hpAfterRoom: state.player.hp
+    }
+  ]
+});
+
+const patchLastStep = (state: RunState, patch: Partial<RunState['runSteps'][number]>): RunState => {
+  if (state.runSteps.length === 0) return state;
+  const runSteps = [...state.runSteps];
+  runSteps[runSteps.length - 1] = { ...runSteps[runSteps.length - 1], ...patch };
+  return { ...state, runSteps };
+};
+
+const detectMathType = (prompt: string): 'addition' | 'subtraction' | 'multiplication' | 'division' | 'mixed' => {
+  const matches = prompt.match(/[+\-*/]/g) ?? [];
+  if (matches.length > 1) return 'mixed';
+  const op = matches[0];
+  if (op === '+') return 'addition';
+  if (op === '-') return 'subtraction';
+  if (op === '*') return 'multiplication';
+  if (op === '/') return 'division';
+  return 'mixed';
 };
 
 export const createInitialRunState = (): RunState => ({
@@ -66,7 +98,12 @@ export const createInitialRunState = (): RunState => ({
   activeEvent: null,
   shopOffers: [],
   runLog: ['Новый забег начат. Выберите путь.'],
-  summary: null
+  summary: null,
+  runStartedAt: Date.now(),
+  runEndedAt: null,
+  runSteps: [],
+  answerHistory: [],
+  death: null
 });
 
 const startBattle = (state: RunState, room: RoomDefinition, now: number): RunState => {
@@ -80,13 +117,13 @@ const startBattle = (state: RunState, room: RoomDefinition, now: number): RunSta
     actionLog: [`Встречен враг: ${enemy.name}.`]
   };
 
-  return {
+  return patchLastStep({
     ...state,
     status: 'battle',
     activeRoom: room,
     activeBattle: battle,
     player: { ...state.player, combo: 0, mistakesForgivenInBattle: false }
-  };
+  }, { enemyName: enemy.name });
 };
 
 export const chooseRoom = (state: RunState, roomId: string, now: number): RunState => {
@@ -95,7 +132,8 @@ export const chooseRoom = (state: RunState, roomId: string, now: number): RunSta
   const room = state.roomChoices.find((item) => item.id === roomId);
   if (!room) return state;
 
-  const taggedState = pushRunLog(state, `[${room.type}] ${room.title}`);
+  const withStep = appendStep(state, room);
+  const taggedState = pushRunLog(withStep, `[${room.type}] ${room.title}`);
 
   if (room.type === 'fight' || room.type === 'elite') {
     return startBattle(taggedState, room, now);
@@ -147,6 +185,7 @@ export const resolveBattleAnswer = (state: RunState, answer: string, submittedAt
   if (state.status !== 'battle' || !state.activeBattle || !state.activeRoom) return state;
 
   const answerTimeMs = Math.max(0, submittedAt - state.activeBattle.startedAt);
+  const currentTask = state.activeBattle.currentTask;
   const output = battleEngine.resolveTurn(state.activeBattle, state.player, answer, answerTimeMs, submittedAt);
 
   let next: RunState = {
@@ -155,7 +194,18 @@ export const resolveBattleAnswer = (state: RunState, answer: string, submittedAt
     activeBattle: {
       ...output.battle,
       startedAt: submittedAt
-    }
+    },
+    answerHistory: [
+      ...state.answerHistory,
+      {
+        step: state.runSteps.length,
+        depth: state.depth,
+        roomType: state.activeRoom.type,
+        prompt: currentTask.prompt,
+        isCorrect: output.result.isCorrect,
+        timedOut: answerTimeMs > currentTask.timeLimitMs
+      }
+    ]
   };
 
   if (output.result.victory) {
@@ -174,7 +224,7 @@ export const resolveBattleAnswer = (state: RunState, answer: string, submittedAt
     reward.gold = Math.round(reward.gold * extraMultiplier);
 
     const healAfterVictory = getHealAfterVictory(output.player);
-    next = {
+    next = patchLastStep({
       ...next,
       status: 'reward',
       pendingReward: { ...reward, heal: healAfterVictory },
@@ -185,11 +235,11 @@ export const resolveBattleAnswer = (state: RunState, answer: string, submittedAt
         ...next.player,
         hp: clamp(next.player.hp + healAfterVictory, 0, next.player.maxHp)
       }
-    };
+    }, { hpAfterRoom: next.player.hp, rewardOrEvent: `Награда: ${reward.gold} золота, ${reward.crystals} кристаллов` });
   }
 
   if (output.result.defeat) {
-    return finishRun({ ...next, status: 'game-over' });
+    return finishRun({ ...next, status: 'game-over' }, `Поражение в ${state.activeRoom.title}`);
   }
 
   return pushRunLog(next, output.result.logLine);
@@ -212,8 +262,9 @@ export const claimReward = (state: RunState, relicId?: string): RunState => {
     }
   }
 
+  const patched = patchLastStep(state, { hpAfterRoom: nextPlayer.hp });
   return nextRoomChoiceState({
-    ...state,
+    ...patched,
     player: nextPlayer,
     pendingReward: null,
     depth: state.depth + 1
@@ -228,12 +279,14 @@ export const resolveEventOption = (state: RunState, optionId: string): RunState 
 
   const applied = option.apply(state);
   if (applied.player.hp <= 0) {
-    return finishRun({ ...applied, status: 'game-over' });
+    return finishRun({ ...applied, status: 'game-over' }, `Смерть после события: ${option.label}`);
   }
 
-  if (applied.pendingReward) {
+  const patched = patchLastStep(applied, { hpAfterRoom: applied.player.hp, rewardOrEvent: option.label });
+
+  if (patched.pendingReward) {
     return {
-      ...applied,
+      ...patched,
       status: 'reward',
       activeEvent: null,
       depth: state.depth + 1,
@@ -242,7 +295,7 @@ export const resolveEventOption = (state: RunState, optionId: string): RunState 
   }
 
   return nextRoomChoiceState({
-    ...applied,
+    ...patched,
     activeEvent: null,
     depth: state.depth + 1,
     roomsCleared: state.roomsCleared + 1
@@ -256,12 +309,12 @@ export const resolveRestChoice = (state: RunState, mode: 'heal' | 'buff'): RunSt
     ? { ...state.player, hp: clamp(state.player.hp + 16, 0, state.player.maxHp) }
     : { ...state.player, armor: state.player.armor + 1 };
 
-  return nextRoomChoiceState({
+  return nextRoomChoiceState(patchLastStep({
     ...state,
     player: next,
     depth: state.depth + 1,
     roomsCleared: state.roomsCleared + 1
-  });
+  }, { hpAfterRoom: next.hp, rewardOrEvent: mode === 'heal' ? 'Короткий отдых' : 'Усиление брони' }));
 };
 
 export const buyShopOffer = (state: RunState, offerId: string): RunState => {
@@ -281,17 +334,21 @@ export const buyShopOffer = (state: RunState, offerId: string): RunState => {
 
 export const leaveRoom = (state: RunState): RunState => {
   if (state.status === 'shop' || state.status === 'rest') {
-    return nextRoomChoiceState({
+    return nextRoomChoiceState(patchLastStep({
       ...state,
       depth: state.depth + 1,
       roomsCleared: state.roomsCleared + 1
-    });
+    }, { hpAfterRoom: state.player.hp, rewardOrEvent: state.status === 'shop' ? 'Покупки завершены' : 'Привал завершён' }));
   }
   return state;
 };
 
 export const makeSummary = (state: RunState, recordDepth: number): RunSummary => ({
   depthReached: state.depth,
+  durationMs: (state.runEndedAt ?? Date.now()) - state.runStartedAt,
+  gold: state.player.gold,
+  crystals: state.player.crystals,
+  deathReason: state.death?.reason ?? 'Забег завершён',
   roomsCleared: state.roomsCleared,
   enemiesDefeated: state.enemiesDefeated,
   bestCombo: state.player.bestCombo,
@@ -300,11 +357,27 @@ export const makeSummary = (state: RunState, recordDepth: number): RunSummary =>
   recordDepth
 });
 
-export const finishRun = (state: RunState): RunState => ({
-  ...state,
-  status: 'game-over'
-});
+export const finishRun = (state: RunState, reason = 'HP истощено'): RunState => {
+  const death = {
+    reason,
+    roomType: state.activeRoom?.type ?? 'event',
+    depth: state.depth,
+    step: Math.max(1, state.runSteps.length)
+  };
+  const withDeath = state.activeRoom
+    ? patchLastStep(state, { hpAfterRoom: state.player.hp, rewardOrEvent: reason })
+    : state;
+
+  return {
+    ...withDeath,
+    status: 'game-over',
+    runEndedAt: Date.now(),
+    death
+  };
+};
 
 export const isRunOver = (state: RunState): boolean => state.player.hp <= 0 || state.status === 'game-over';
 
 export const canAfford = (offer: ShopOffer, gold: number) => gold >= offer.costGold;
+
+export const detectMathCategory = detectMathType;
