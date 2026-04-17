@@ -30,6 +30,13 @@ export const ModeSelectionPage = () => {
         <p>Статус: Открыт</p>
         <Link className="cta-link" to="/strategy">Открыть стратегию</Link>
       </article>
+      <article className="card strategy-mode-preview">
+        <h3>Подземелье Счёта (Roguelike)</h3>
+        <p>Бесконечный roguelike-lite с процедурными комнатами, боями и реликвиями.</p>
+        <p>Сложность: Растущая</p>
+        <p>Статус: Открыт</p>
+        <Link className="cta-link" to="/roguelike">Открыть подземелье</Link>
+      </article>
         {modes.map((mode) => {
           const modeStats = stats.byMode[mode.id];
           const isUnlocked = !mode.locked && progress.unlockedModes.includes(mode.id);

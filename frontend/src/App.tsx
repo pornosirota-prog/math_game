@@ -10,6 +10,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { ResultsPage } from './pages/ResultsPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
 import { StrategyPage } from './features/strategy/StrategyPage';
+import { RoguelikePage } from './features/roguelike/RoguelikePage';
 import { useAuthStore } from './store/authStore';
 import { useSettingsStore } from './store/settingsStore';
 import { SiteFooter } from './components/footer/SiteFooter';
@@ -38,6 +39,7 @@ const NAV_ITEMS: NavEntry[] = [
   { to: '/game?mode=classic', label: 'Играть', icon: '🎮' },
   { to: '/modes', label: 'Режимы', icon: '🧩' },
   { to: '/strategy', label: 'Стратегия', icon: '🗺️' },
+  { to: '/roguelike', label: 'Подземелье', icon: '🕯️' },
   { to: '/leaderboard', label: 'Рейтинг', icon: '🏆' },
   { to: '/achievements', label: 'Достижения', icon: '⭐' },
   { to: '/profile', label: 'Профиль', icon: '👤' },
@@ -258,6 +260,7 @@ export default function App() {
           <Route path="settings" element={<SettingsPage />} />
           <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="strategy" element={<StrategyPage />} />
+          <Route path="roguelike" element={<RoguelikePage />} />
           <Route path="achievements" element={<InfoPage content={{
             title: 'Achievements',
             description: 'Прогресс по достижениям и бейджам игрока в Math Game.',
