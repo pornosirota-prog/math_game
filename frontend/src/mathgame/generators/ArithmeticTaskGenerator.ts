@@ -43,6 +43,59 @@ interface GenerationOptions {
   recentAnswers?: number[];
 }
 
+const isIntegerResult = (value: number): boolean => Math.abs(value - Math.round(value)) < 1e-9;
+
+const generateGuaranteedIntegerFallback = (template: DifficultyTemplate): { prompt: string; answer: number } => {
+  const leftSpec = template.numberSpecs[0];
+  const rightSpec = template.numberSpecs[1];
+  const preferredOperation = template.operations[0] ?? '+';
+
+  if (!leftSpec || !rightSpec) {
+    return { prompt: '2 + 2', answer: 4 };
+  }
+
+  if (preferredOperation === '/') {
+    for (let attempt = 0; attempt < 250; attempt += 1) {
+      const divisor = rndInt(Math.max(1, rightSpec.min), Math.max(1, rightSpec.max));
+      const minQuotient = Math.max(1, Math.ceil(leftSpec.min / divisor));
+      const maxQuotient = Math.max(minQuotient, Math.floor(leftSpec.max / divisor));
+      if (minQuotient > maxQuotient) {
+        continue;
+      }
+
+      const quotient = rndInt(minQuotient, maxQuotient);
+      const dividend = divisor * quotient;
+      if (dividend >= leftSpec.min && dividend <= leftSpec.max) {
+        return { prompt: `${dividend} / ${divisor}`, answer: quotient };
+      }
+    }
+  }
+
+  const left = rndInt(leftSpec.min, leftSpec.max);
+  const right = preferredOperation === '-' && !template.allowNegativeResult
+    ? (() => {
+        const minRight = Math.max(rightSpec.min, 1);
+        const maxRight = Math.min(rightSpec.max, Math.max(1, left));
+        return rndInt(minRight, Math.max(minRight, maxRight));
+      })()
+    : rndInt(rightSpec.min, rightSpec.max);
+  const safeRight = preferredOperation === '/' && right === 0 ? 1 : right;
+  const answer = apply(left, safeRight, preferredOperation);
+  if (isIntegerResult(answer)) {
+    return {
+      prompt: `${left} ${preferredOperation} ${safeRight}`,
+      answer: Math.round(answer)
+    };
+  }
+
+  const normalizedRight = Math.max(1, Math.abs(safeRight));
+  const normalizedLeft = normalizedRight * rndInt(1, 12);
+  return {
+    prompt: `${normalizedLeft} / ${normalizedRight}`,
+    answer: Math.round(normalizedLeft / normalizedRight)
+  };
+};
+
 const isTooSimilar = (prompt: string, answer: number, options?: GenerationOptions): boolean => {
   if (!options) return false;
   const compactPrompt = prompt.replace(/\s+/g, ' ').trim();
@@ -83,7 +136,11 @@ export class ArithmeticTaskGenerator {
         value = apply(value, numbers[i + 1], op);
       }
 
-      const answer = Number(value.toFixed(2));
+      if (!isIntegerResult(value)) {
+        continue;
+      }
+
+      const answer = Math.round(value);
       if (attempt < 7 && isTooSimilar(expression, answer, options)) {
         continue;
       }
@@ -104,16 +161,33 @@ export class ArithmeticTaskGenerator {
       };
     }
 
-    const fallback = template.numberSpecs.map((spec) => rndInt(spec.min, spec.max));
-    const op = template.operations[0] ?? '+';
-    const fallbackPrompt = fallback.slice(1).reduce((expr, num) => `${expr} ${op} ${num}`, `${fallback[0]}`);
-    const fallbackAnswer = fallback.slice(1).reduce((acc, num) => apply(acc, num, op), fallback[0]);
+    for (let fallbackAttempt = 0; fallbackAttempt < 16; fallbackAttempt += 1) {
+      const fallback = template.numberSpecs.map((spec) => rndInt(spec.min, spec.max));
+      const op = template.operations[0] ?? '+';
+      const fallbackPrompt = fallback.slice(1).reduce((expr, num) => `${expr} ${op} ${num}`, `${fallback[0]}`);
+      const fallbackAnswerRaw = fallback.slice(1).reduce((acc, num) => apply(acc, num, op), fallback[0]);
+      if (!isIntegerResult(fallbackAnswerRaw)) {
+        continue;
+      }
+
+      return {
+        id: crypto.randomUUID(),
+        kind: template.taskKind,
+        prompt: fallbackPrompt,
+        answer: Math.round(fallbackAnswerRaw),
+        difficultyRating: Number((template.tier + difficultyScore / 25 + (template.challengeWeight ?? 1)).toFixed(2)),
+        timeLimitMs: Math.round(template.expectedTimeMs * 1.5),
+        templateId: template.id,
+        tier: template.tier,
+        expectedTimeMs: template.expectedTimeMs,
+        modifier: 'normal'
+      };
+    }
 
     return {
       id: crypto.randomUUID(),
       kind: template.taskKind,
-      prompt: fallbackPrompt,
-      answer: fallbackAnswer,
+      ...generateGuaranteedIntegerFallback(template),
       difficultyRating: Number((template.tier + difficultyScore / 25 + (template.challengeWeight ?? 1)).toFixed(2)),
       timeLimitMs: Math.round(template.expectedTimeMs * 1.5),
       templateId: template.id,
