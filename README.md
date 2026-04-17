@@ -129,3 +129,54 @@ Flyway миграция `V1__init.sql` создает demo-игрока:
 - `Unit`, `Building`, `Ability`
 
 Эти интерфейсы позволяют добавлять новые механики (типы территорий, PvE/PvP, ежедневные события, сезонные модификаторы) без переписывания ядра.
+
+## Новый режим: Подземелье Счёта (Math Roguelike MVP)
+
+Добавлен отдельный endless roguelike-lite режим на роуте `/roguelike` (доступен после авторизации), изолированный от классического режима `/game`.
+
+### Как открыть
+1. Войдите в аккаунт.
+2. Перейдите в боковом меню в **«Подземелье»** или откройте страницу **«Режимы»** → **«Подземелье Счёта (Roguelike)»**.
+3. Для возврата в старый режим используйте кнопку **«Классический режим»** в HUD страницы roguelike.
+
+### Core loop режима
+- На каждом шаге предлагаются 3 процедурно сгенерированные комнаты (`fight`, `elite`, `treasure`, `event`, `shop`, `rest`).
+- В бою игрок решает математические задачи, наносит урон, накапливает combo и speed bonus.
+- После победы выдаются награды: золото, кристаллы, иногда выбор реликвии.
+- Event/Shop/Rest комнаты дают альтернативные источники прогресса.
+- При смерти показывается сводка run и обновляется рекорд глубины.
+
+### Где лежит архитектура roguelike feature
+`frontend/src/features/roguelike/`:
+- `RoguelikePage.tsx` — page/container и связывание экранов.
+- `domain/types.ts` — доменные интерфейсы (`RunState`, `BattleState`, `Reward`, `RelicDefinition`, `EventDefinition`, `RunSummary` и др.).
+- `store/runEngine.ts` — чистые функции игрового цикла (выбор комнат, бой, награды, события, магазин, summary).
+- `store/useRoguelikeRun.ts` — state orchestration + persistence рекордов.
+- `services/`:
+  - `roomGenerator.ts` — процедурная генерация комнат с весами и ограничениями.
+  - `difficultyStrategy.ts` — `MathDifficultyScaler` (рост сложности по глубине).
+  - `mathTaskGenerator.ts` — генерация математических задач.
+  - `battleEngine.ts` — расчёт хода боя и штрафов за ошибки.
+  - `rewardCalculator.ts` — масштабирование наград от риска и качества игры.
+  - `relicEngine.ts` — data-driven применение реликвий.
+  - `eventEngine.ts`, `shopEngine.ts` — отдельные домены событий/магазина.
+  - `persistence.ts` — localStorage (`mathgame.roguelike.best.v1`).
+- `config/enemies.ts`, `config/relics.ts`, `config/theme.ts` — data-driven конфиги врагов, реликвий и визуальных токенов темы.
+- `ui/` — изолированные UI панели (`RoomChoicePanel`, `BattlePanel`, `RewardPanel`, `EventPanel`, `ShopPanel`, `RestPanel`, `GameOverPanel`, `DungeonHud`).
+
+### Как расширять дальше (extension points)
+- Добавить врага: `config/enemies.ts` + (опционально) новый `behavior` в battle engine.
+- Добавить реликвию: `config/relics.ts` + обработка нового `RelicEffect.type` в `services/relicEngine.ts`.
+- Добавить новую комнату: расширить `RoomType` и генерацию в `services/roomGenerator.ts`, затем подключить отдельную UI/обработчик в `RoguelikePage.tsx` и `store/runEngine.ts`.
+- Изменить кривую сложности: `services/difficultyStrategy.ts`.
+- Изменить генерацию задач: `services/mathTaskGenerator.ts`.
+- Добавить meta progression/daily challenges/boss fights: новые сервисы, не ломая текущий loop в `store/runEngine.ts`.
+
+### Тесты логики roguelike
+- `frontend/tests/roguelike.test.cjs` проверяет:
+  - scaling сложности;
+  - генерацию комнат;
+  - расчёт наград;
+  - применение реликвий;
+  - progression run (battle → reward → next depth);
+  - формирование summary после смерти.

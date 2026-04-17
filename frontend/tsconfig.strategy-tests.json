@@ -12,6 +12,10 @@
     "src/features/strategy/config/**/*.ts",
     "src/features/strategy/domain/**/*.ts",
     "src/features/strategy/services/**/*.ts",
-    "src/features/strategy/store/**/*.ts"
+    "src/features/strategy/store/**/*.ts",
+    "src/features/roguelike/config/**/*.ts",
+    "src/features/roguelike/domain/**/*.ts",
+    "src/features/roguelike/services/**/*.ts",
+    "src/features/roguelike/store/**/*.ts"
   ]
 }
