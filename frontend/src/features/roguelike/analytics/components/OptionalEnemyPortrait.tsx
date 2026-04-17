@@ -1,0 +1,1 @@
+export { OptionalEnemyPortrait } from './OptionalVisuals';

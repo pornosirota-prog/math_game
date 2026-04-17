@@ -16,6 +16,8 @@
     "src/features/roguelike/config/**/*.ts",
     "src/features/roguelike/domain/**/*.ts",
     "src/features/roguelike/services/**/*.ts",
-    "src/features/roguelike/store/**/*.ts"
+    "src/features/roguelike/store/**/*.ts",
+    "src/features/roguelike/analytics/**/*.ts",
+    "src/features/roguelike/assets/**/*.ts"
   ]
 }

@@ -129,8 +129,38 @@ export interface BattleTurnResult {
   defeat: boolean;
 }
 
+
+export interface RunStepRecord {
+  step: number;
+  roomType: RoomType;
+  depth: number;
+  roomTitle: string;
+  hpAfterRoom: number;
+  rewardOrEvent?: string;
+  enemyName?: string;
+}
+
+export interface RunAnswerRecord {
+  step: number;
+  depth: number;
+  roomType: RoomType;
+  prompt: string;
+  isCorrect: boolean;
+  timedOut: boolean;
+}
+
+export interface RunDeathSummary {
+  reason: string;
+  roomType: RoomType;
+  depth: number;
+  step: number;
+}
 export interface RunSummary {
   depthReached: number;
+  durationMs: number;
+  gold: number;
+  crystals: number;
+  deathReason: string;
   roomsCleared: number;
   enemiesDefeated: number;
   bestCombo: number;
@@ -153,6 +183,11 @@ export interface RunState {
   shopOffers: ShopOffer[];
   runLog: string[];
   summary: RunSummary | null;
+  runStartedAt: number;
+  runEndedAt: number | null;
+  runSteps: RunStepRecord[];
+  answerHistory: RunAnswerRecord[];
+  death: RunDeathSummary | null;
 }
 
 export interface DifficultyStrategy {
