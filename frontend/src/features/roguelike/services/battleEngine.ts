@@ -1,5 +1,6 @@
 import { BattleState, BattleTurnResult, MathTaskGenerator, PlayerState } from '../domain/types';
 import { hasMistakeForgiveness } from './relicEngine';
+import { isAnswerCorrect } from '../../../shared/math/answerValidation';
 
 const round = (value: number) => Math.round(value * 100) / 100;
 
@@ -11,8 +12,7 @@ export const createBattleResolver = (taskGenerator: MathTaskGenerator) => {
     answerTimeMs: number,
     now: number
   ): { battle: BattleState; player: PlayerState; result: BattleTurnResult } => {
-    const numeric = Number(answer.replace(',', '.'));
-    const isCorrect = Number.isFinite(numeric) && Math.abs(numeric - battle.currentTask.answer) < 0.01;
+    const isCorrect = isAnswerCorrect(answer, battle.currentTask.answer, battle.currentTask.prompt);
     const isFast = isCorrect && answerTimeMs <= battle.enemy.speedPressureMs;
     const speedBonus = isFast ? 1 + player.speedBonusMultiplier : 1;
 

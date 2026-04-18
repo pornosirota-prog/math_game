@@ -19,6 +19,7 @@ import {
 } from '../storage/localStorageRepo';
 import { soundManager } from '../../sound/soundManager';
 import { useSettingsStore } from '../../store/settingsStore';
+import { isAnswerCorrect, normalizeNumericInput } from '../../shared/math/answerValidation';
 
 import { createInitialMastery, tierByDifficultyScore } from '../config/adaptiveTemplates';
 
@@ -81,28 +82,6 @@ const notifyRunFinished = (score: number, accuracy: number) => {
   }
 };
 
-const normalizeNumericInput = (rawInput: string): number => {
-  const normalized = rawInput.replace(',', '.').trim();
-  if (!normalized) return Number.NaN;
-
-  const numeric = Number(normalized);
-  if (Number.isFinite(numeric)) {
-    return numeric;
-  }
-
-  const expressionPattern = /^[\d+\-*/().\s]+$/;
-  if (!expressionPattern.test(normalized)) {
-    return Number.NaN;
-  }
-
-  try {
-    // eslint-disable-next-line no-new-func
-    const evaluated = Number(new Function(`return (${normalized});`)());
-    return Number.isFinite(evaluated) ? evaluated : Number.NaN;
-  } catch {
-    return Number.NaN;
-  }
-};
 
 const buildRunState = (modeId: GameModeId, config?: RunConfig): RunState => {
   const mode = modeRegistry.find((item) => item.id === modeId);
@@ -239,8 +218,8 @@ export const useMathTrainer = (options?: { autoStart?: boolean }) => {
     if (!normalizedInput) return;
 
     const elapsed = Date.now() - startedAt;
-    const numeric = normalizeNumericInput(normalizedInput);
-    const isCorrect = Number.isFinite(numeric) && Math.abs(numeric - task.answer) < 0.01;
+    const parsedInput = normalizeNumericInput(normalizedInput);
+    const isCorrect = Number.isFinite(parsedInput) && isAnswerCorrect(normalizedInput, task.answer, task.prompt);
 
     const attempt: TaskAttempt = {
       taskId: task.id,

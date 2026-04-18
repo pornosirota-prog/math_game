@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test:strategy": "tsc -p tsconfig.strategy-tests.json && node -e \"require('fs').writeFileSync('.tmp-strategy-tests/package.json', '{\\\"type\\\":\\\"commonjs\\\"}')\" && node --test tests/strategy.test.cjs tests/roguelike.test.cjs tests/roguelike-analytics.test.cjs"
+    "test:strategy": "tsc -p tsconfig.strategy-tests.json && node -e \"require('fs').writeFileSync('.tmp-strategy-tests/package.json', '{\\\"type\\\":\\\"commonjs\\\"}')\" && node --test tests/strategy.test.cjs tests/roguelike.test.cjs tests/roguelike-analytics.test.cjs tests/mathgame-answer-validation.test.cjs"
   },
   "dependencies": {
     "axios": "^1.9.0",
