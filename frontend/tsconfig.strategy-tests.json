@@ -18,6 +18,9 @@
     "src/features/roguelike/services/**/*.ts",
     "src/features/roguelike/store/**/*.ts",
     "src/features/roguelike/analytics/**/*.ts",
-    "src/features/roguelike/assets/**/*.ts"
+    "src/features/roguelike/assets/**/*.ts",
+    "src/mathgame/domain/**/*.ts",
+    "src/mathgame/generators/**/*.ts",
+    "src/shared/math/**/*.ts"
   ]
 }
