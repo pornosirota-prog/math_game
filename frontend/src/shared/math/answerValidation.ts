@@ -1,24 +1,65 @@
 const DEFAULT_TOLERANCE = 0.01;
 
+const normalizeMathInput = (rawInput: string): string =>
+  rawInput
+    .replace(/[−﹣－]/g, '-')
+    .replace(/[×⋅]/g, '*')
+    .replace(/[÷∶]/g, '/')
+    .replace(',', '.')
+    .trim();
+
 const parseInputNumber = (rawInput: string): number => {
-  const normalized = rawInput.replace(',', '.').trim();
+  const normalized = normalizeMathInput(rawInput);
   if (!normalized) return Number.NaN;
   return Number(normalized);
 };
 
-const expressionPattern = /^\s*-?\d+(?:\.\d+)?(?:\s*[+\-*/]\s*-?\d+(?:\.\d+)?)*\s*$/;
-
 const parseLinearExpression = (expression: string): { numbers: number[]; operators: string[] } | null => {
-  if (!expressionPattern.test(expression)) return null;
+  const compact = normalizeMathInput(expression).replace(/\s+/g, '');
+  if (!compact) return null;
 
-  const compact = expression.replace(/\s+/g, '');
-  const numbers = compact.split(/[+\-*/]/).map(Number);
-  const operators = compact.match(/[+\-*/]/g) ?? [];
+  const numbers: number[] = [];
+  const operators: string[] = [];
+  let index = 0;
+  let expectNumber = true;
 
-  if (numbers.length !== operators.length + 1 || numbers.some((value) => !Number.isFinite(value))) {
-    return null;
+  while (index < compact.length) {
+    if (expectNumber) {
+      const start = index;
+      if (compact[index] === '-') {
+        index += 1;
+      }
+
+      let hasDigits = false;
+      while (index < compact.length && /\d/.test(compact[index])) {
+        hasDigits = true;
+        index += 1;
+      }
+
+      if (compact[index] === '.') {
+        index += 1;
+        while (index < compact.length && /\d/.test(compact[index])) {
+          hasDigits = true;
+          index += 1;
+        }
+      }
+
+      if (!hasDigits) return null;
+      const value = Number(compact.slice(start, index));
+      if (!Number.isFinite(value)) return null;
+      numbers.push(value);
+      expectNumber = false;
+      continue;
+    }
+
+    const operator = compact[index];
+    if (!['+', '-', '*', '/'].includes(operator)) return null;
+    operators.push(operator);
+    index += 1;
+    expectNumber = true;
   }
 
+  if (expectNumber || numbers.length !== operators.length + 1) return null;
   return { numbers, operators };
 };
 
@@ -60,7 +101,7 @@ export const isAnswerCorrect = (
 };
 
 export const normalizeNumericInput = (rawInput: string): number => {
-  const normalized = rawInput.replace(',', '.').trim();
+  const normalized = normalizeMathInput(rawInput);
   if (!normalized) return Number.NaN;
 
   const numeric = Number(normalized);
